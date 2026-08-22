@@ -1,0 +1,80 @@
+Options -Indexes
+DirectoryIndex index.html
+ErrorDocument 404 /nuxt-app/current/404.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Keep one public hostname so canonicals, shares and analytics agree.
+  RewriteCond %{HTTP_HOST} ^www\.heekmahgroup\.com$ [NC]
+  RewriteRule ^ https://heekmahgroup.com%{REQUEST_URI} [R=301,L]
+
+  # Consolidate retired WordPress and SEO-plugin sitemap URLs.
+  RewriteRule ^(?:wp-sitemap.*|sitemap_index|[^/]+-sitemap[0-9]*)\.xml$ /sitemap.xml [R=301,L,NC]
+
+  # Preserve the one renamed public route.
+  RewriteRule ^heekmah-services/?$ /heekmah-integral-services/ [R=301,L,NC]
+
+  # Prevent direct indexing of the internal release directory while allowing internal rewrites.
+  RewriteCond %{THE_REQUEST} \s/+nuxt-app/ [NC]
+  RewriteRule ^nuxt-app/ - [F,L]
+  RewriteRule ^nuxt-app/ - [L]
+
+  # Let authenticated WordPress previews reach WordPress instead of the static route.
+  RewriteCond %{QUERY_STRING} (^|&)preview=true(&|$) [NC]
+  RewriteRule ^ index.php [QSA,L]
+
+  # Keep the WordPress REST API available to the Nuxt build and enquiry form.
+  RewriteRule ^wp-json(?:/.*)?$ index.php [QSA,L]
+
+  # Avoid a duplicate public WordPress homepage at /index.php.
+  RewriteCond %{THE_REQUEST} \s/+index\.php(?:[?\s]) [NC]
+  RewriteRule ^index\.php$ / [R=301,L]
+
+  # Serve the Nuxt homepage, public assets and generated route files.
+  RewriteRule ^$ nuxt-app/current/index.html [L]
+
+  RewriteCond %{DOCUMENT_ROOT}/nuxt-app/current/$1 -f
+  RewriteRule ^(.+)$ nuxt-app/current/$1 [L]
+
+  # Redirect extensionless route variants to the canonical trailing slash.
+  RewriteCond %{REQUEST_URI} !/$
+  RewriteCond %{DOCUMENT_ROOT}/nuxt-app/current/$1/index.html -f
+  RewriteRule ^(.+)$ /$1/ [R=301,L]
+
+  RewriteCond %{DOCUMENT_ROOT}/nuxt-app/current/$1/index.html -f
+  RewriteRule ^(.+?)/?$ nuxt-app/current/$1/index.html [L]
+
+  # Preserve real WordPress admin, core, plugin and upload files.
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Return the generated Nuxt 404 page with a real 404 status.
+  RewriteRule ^ - [R=404,L]
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+
+  <FilesMatch "\.(?:html|json)$">
+    Header set Cache-Control "public, max-age=0, must-revalidate"
+  </FilesMatch>
+
+  <FilesMatch "\.(?:css|js|mjs|webp|avif|png|jpe?g|gif|svg|ico|woff2?)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/html "access plus 0 seconds"
+  ExpiresByType application/json "access plus 0 seconds"
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/avif "access plus 1 year"
+</IfModule>
