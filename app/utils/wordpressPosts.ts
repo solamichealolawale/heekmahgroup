@@ -4,7 +4,12 @@ import sanitizeHtml from 'sanitize-html'
 
 import { articles as fallbackArticles } from '~/data/articles'
 import type { ArticleContent, MediaAsset } from '~/types/content'
-import { parseWordPressPostArray, type WordPressMedia, type WordPressPost } from '~/utils/wordpressPostValidation'
+import {
+  parseWordPressPageCount,
+  parseWordPressPostArray,
+  type WordPressMedia,
+  type WordPressPost,
+} from '~/utils/wordpressPostValidation'
 
 const allowedTags = [
   'p',
@@ -170,17 +175,7 @@ function featuredImage(post: WordPressPost, fallback?: ArticleContent): MediaAss
 
   if (fallback) return fallback.image
 
-  const imageTag = post.content.rendered.match(/<img\b[^>]*>/i)?.[0]
-  const attribute = (name: string): string | undefined =>
-    imageTag?.match(new RegExp(`\\b${name}=["']([^"']+)["']`, 'i'))?.[1]
-
-  return {
-    src: attribute('src') ?? fallbackArticles[0].image.src,
-    alt: attribute('alt')?.trim() || plainText(post.title.rendered),
-    width: Number(attribute('width')) || 1600,
-    height: Number(attribute('height')) || 900,
-    srcSet: attribute('srcset'),
-  }
+  return fallbackArticles[0].image
 }
 
 function postCategory(post: WordPressPost): string {
@@ -268,7 +263,7 @@ async function fetchAndTransformWordPressArticles(
 ): Promise<readonly ArticleContent[]> {
   try {
     const firstPage = await fetchWordPressPostPage(wordpressUrl, 1)
-    const pageCount = Math.min(Number(firstPage.headers.get('x-wp-totalpages') ?? 1), 20)
+    const pageCount = parseWordPressPageCount(firstPage.headers.get('x-wp-totalpages'))
     const posts = [...firstPage.posts]
 
     for (let page = 2; page <= pageCount; page += 1) {

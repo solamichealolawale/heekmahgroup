@@ -1,6 +1,10 @@
 import { articles as fallbackArticles } from '~/data/articles'
 import type { ArticleSummary, MediaAsset } from '~/types/content'
-import { parseWordPressPostArray, type WordPressSummaryPost } from '~/utils/wordpressPostValidation'
+import {
+  parseWordPressPageCount,
+  parseWordPressPostArray,
+  type WordPressSummaryPost,
+} from '~/utils/wordpressPostValidation'
 
 function decodeHtmlEntities(value: string): string {
   const namedEntities: Readonly<Record<string, string>> = {
@@ -102,15 +106,15 @@ interface SummaryCacheEntry {
 
 const summaryCache = new Map<string, SummaryCacheEntry>()
 
-async function fetchWordPressArticleSummaries(wordpressUrl: string): Promise<readonly ArticleSummary[]> {
+async function fetchWordPressSummaryPage(wordpressUrl: string, page: number, refresh: number) {
   const response = await $fetch.raw<unknown>(`${wordpressUrl}/wp-json/wp/v2/posts`, {
     query: {
-      page: 1,
+      page,
       per_page: 100,
       status: 'publish',
       order: 'desc',
       orderby: 'date',
-      heekmah_refresh: Date.now(),
+      heekmah_refresh: refresh,
       _embed: 'wp:featuredmedia,wp:term',
       _fields: 'id,slug,date,modified,title,excerpt,featured_media,categories,_links,_embedded',
     },
@@ -118,7 +122,26 @@ async function fetchWordPressArticleSummaries(wordpressUrl: string): Promise<rea
     retry: 1,
   })
 
-  return parseWordPressPostArray(response._data, false).map(transformWordPressPostSummary)
+  return {
+    headers: response.headers,
+    posts: parseWordPressPostArray(response._data, false),
+  }
+}
+
+async function fetchWordPressArticleSummaries(wordpressUrl: string): Promise<readonly ArticleSummary[]> {
+  const refresh = Date.now()
+  const firstPage = await fetchWordPressSummaryPage(wordpressUrl, 1, refresh)
+  const pageCount = parseWordPressPageCount(firstPage.headers?.get('x-wp-totalpages'))
+  const posts = [...firstPage.posts]
+
+  if (pageCount > 1) {
+    const remainingPages = await Promise.all(
+      Array.from({ length: pageCount - 1 }, (_, index) => fetchWordPressSummaryPage(wordpressUrl, index + 2, refresh)),
+    )
+    for (const page of remainingPages) posts.push(...page.posts)
+  }
+
+  return posts.map(transformWordPressPostSummary)
 }
 
 export async function getWordPressArticleSummaries(wordpressUrl: string): Promise<readonly ArticleSummary[]> {

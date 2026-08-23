@@ -9,10 +9,7 @@ defineProps<{
 <template>
   <section class="partnership-section">
     <div class="partnership-image">
-      <ResponsiveImage
-        :asset="content.image"
-        sizes="(max-width: 860px) 100vw, 55vw"
-      />
+      <ResponsiveImage :asset="content.image" sizes="(max-width: 860px) 100vw, 55vw" />
     </div>
     <div class="partnership-copy">
       <p class="eyebrow">{{ content.eyebrow }}</p>

@@ -28,6 +28,8 @@ export async function useCmsContent<T>(key: string, fallback: T): Promise<Comput
 
         return candidate as T
       } catch (error) {
+        if (config.cmsStrict) throw error
+
         console.warn(`[Heekmah CMS] Using bundled ${key} content because WordPress could not be reached.`, error)
         return fallback
       }
@@ -62,7 +64,9 @@ export async function useCmsContent<T>(key: string, fallback: T): Promise<Comput
     })
   }
 
-  const { data } = await contentRequest
+  const { data, error } = await contentRequest
+
+  if (import.meta.server && config.cmsStrict && error.value) throw error.value
 
   return computed<T>(() => (data.value as T | null) ?? fallback)
 }

@@ -1,10 +1,22 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { getWordPressArticleSummaries } from '../app/utils/wordpressPostSummaries'
-import { getWordPressArticle } from '../app/utils/wordpressPosts'
+import { getWordPressArticle, getWordPressArticles } from '../app/utils/wordpressPosts'
+
+const summaryPost = {
+  id: 88,
+  slug: 'paginated-story',
+  date: '2026-08-20T10:30:00',
+  modified: '2026-08-21T11:45:00',
+  title: { rendered: 'Paginated story' },
+  excerpt: { rendered: '<p>A story beyond the first page.</p>' },
+  featured_media: 0,
+  categories: [],
+}
 
 afterEach(() => {
   vi.unstubAllGlobals()
+  vi.restoreAllMocks()
 })
 
 describe('WordPress live refresh requests', () => {
@@ -47,5 +59,32 @@ describe('WordPress live refresh requests', () => {
     await expect(getWordPressArticleSummaries('https://malformed-summaries.example')).rejects.toThrow(
       'invalid Posts API response',
     )
+  })
+
+  it('refreshes every reported summary page instead of truncating the archive at 100 posts', async () => {
+    const raw = vi.fn().mockImplementation((_url, options) =>
+      Promise.resolve({
+        _data: [{ ...summaryPost, id: options.query.page }],
+        headers: new Headers({ 'x-wp-totalpages': '2' }),
+      }),
+    )
+    vi.stubGlobal('$fetch', { raw })
+
+    const summaries = await getWordPressArticleSummaries('https://paginated-summaries.example')
+
+    expect(summaries).toHaveLength(2)
+    expect(raw).toHaveBeenCalledTimes(2)
+    expect(raw.mock.calls.map((call) => call[1].query.page)).toEqual([1, 2])
+  })
+
+  it('supports a strict no-fallback mode for production CMS failures', async () => {
+    const failure = new Error('WordPress is offline')
+    const raw = vi.fn().mockRejectedValue(failure)
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    vi.stubGlobal('$fetch', { raw })
+
+    await expect(getWordPressArticles('https://strict-build.example', true, false)).rejects.toBe(failure)
+    await expect(getWordPressArticles('https://preview-fallback.example', true, true)).resolves.not.toEqual([])
+    expect(warning).toHaveBeenCalledOnce()
   })
 })

@@ -22,6 +22,8 @@ export async function useWordPressArticleSummaries(): Promise<ComputedRef<readon
         const latestArticles = await getWordPressArticles(wordpressUrl, true, false)
         return latestArticles.map(toArticleSummary)
       } catch (error) {
+        if (config.cmsStrict) throw error
+
         console.warn(
           '[Heekmah CMS] Using bundled article summaries because WordPress Posts could not be reached.',
           error,
@@ -49,7 +51,9 @@ export async function useWordPressArticleSummaries(): Promise<ComputedRef<readon
     })
   }
 
-  const { data } = await articleRequest
+  const { data, error } = await articleRequest
+
+  if (import.meta.server && config.cmsStrict && error.value) throw error.value
 
   return computed<readonly ArticleSummary[]>(() => data.value ?? fallbackSummaries)
 }
@@ -66,8 +70,16 @@ export async function useWordPressArticle(slug: string): Promise<ComputedRef<Art
 
       try {
         const { getWordPressArticle } = await import('~/utils/wordpressPosts')
-        return await getWordPressArticle(wordpressUrl, slug)
+        const latestArticle = await getWordPressArticle(wordpressUrl, slug)
+
+        if (!latestArticle && config.cmsStrict) {
+          throw new Error(`WordPress did not return the expected published article: ${slug}.`)
+        }
+
+        return latestArticle
       } catch (error) {
+        if (config.cmsStrict) throw error
+
         console.warn(`[Heekmah CMS] Using the bundled ${slug} article because WordPress could not be reached.`, error)
         return fallback
       }
@@ -103,7 +115,9 @@ export async function useWordPressArticle(slug: string): Promise<ComputedRef<Art
     })
   }
 
-  const { data } = await articleRequest
+  const { data, error } = await articleRequest
+
+  if (import.meta.server && config.cmsStrict && error.value) throw error.value
 
   return computed<ArticleContent | undefined>(() => data.value ?? fallback)
 }

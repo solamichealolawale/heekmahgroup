@@ -1,5 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 const cmsEnabled = process.env.NUXT_CMS_ENABLED === 'true'
+const cmsStrict = process.env.NUXT_CMS_STRICT === 'true'
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
@@ -10,6 +11,7 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     cmsEnabled,
+    cmsStrict,
     public: {
       cmsEnabled,
       siteUrl: 'https://heekmahgroup.com',

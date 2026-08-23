@@ -37,7 +37,7 @@ Creating the subdomain, changing DNS, installing plugins and changing live routi
 4. Confirm `https://heekmahgroup.com/wp-json/wp/v2/posts?status=publish` returns the native published posts. Assign a Featured Image to each post so listing and article covers use WordPress-generated responsive candidates; the existing three posts currently use reviewed fallback covers because no Featured Image is assigned.
 5. Confirm a media object in the structured response includes `attachmentId` and `srcSet`. This is the responsive-image contract used by the static frontend.
 6. Upload and activate `heekmah-enquiries.zip` when email delivery is ready to test.
-7. Generate production with `NUXT_CMS_ENABLED=true`. The build fetches every published post, discovers each article route and writes those URLs into the Nuxt sitemap. If WordPress is unavailable during a build, Nuxt logs the failure and uses the bundled reviewed content.
+7. Generate production through `pnpm release:cpanel`. The release command enables strict CMS mode, validates all nine structured collections and every published post, then discovers each article route and writes those URLs into the Nuxt sitemap. If WordPress is unavailable or returns malformed content, packaging stops instead of shipping stale fallback content.
 
 The deployed browser app also refreshes existing page collections and published posts directly from WordPress after hydration. A rebuild is still required when publishing a new post URL and whenever updated HTML, metadata or sitemap content must be available to crawlers before JavaScript runs. Unpublishing or deleting a post is not complete until a new release is deployed: the browser refresh will show a 404, but the old prerendered HTML and sitemap entry remain publicly reachable to no-JavaScript clients and crawlers until that release replaces them.
 
@@ -64,7 +64,7 @@ Neither rollback deletes a release. Keep the last known-good directory until the
 WordPress saves update browser-rendered content immediately after the visitor refreshes. Prerendered source HTML, crawler/social metadata, sitemap entries and new post routes change only after a new static build. The manual starting point is:
 
 ```bash
-NUXT_CMS_ENABLED=true pnpm release:cpanel
+pnpm release:cpanel
 ```
 
 The generated ZIP in `artifacts/cpanel` can be uploaded as `next-<release-id>`. A protected deployment webhook can automate this later, but it should use the same build, upload, verify and directory-swap sequence.

@@ -42,6 +42,16 @@ export interface WordPressPost {
 
 export type WordPressSummaryPost = Omit<WordPressPost, 'content'>
 
+export function parseWordPressPageCount(value: string | null | undefined): number {
+  const pageCount = Number(value ?? 1)
+
+  if (!Number.isInteger(pageCount) || pageCount < 0) {
+    throw new TypeError('WordPress returned an invalid post page count.')
+  }
+
+  return Math.max(pageCount, 1)
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }

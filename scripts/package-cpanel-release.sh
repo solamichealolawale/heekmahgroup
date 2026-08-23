@@ -9,7 +9,11 @@ archive_path="${artifact_dir}/heekmah-nuxt-${release_id}.zip"
 
 cd "${project_root}"
 
+export NUXT_CMS_ENABLED=true
+export NUXT_CMS_STRICT=true
+
 pnpm content:export
+pnpm cms:validate
 pnpm test
 pnpm exec nuxi typecheck
 pnpm generate

@@ -91,6 +91,17 @@ describe('WordPress Posts adapter', () => {
     expect(article.image).toEqual(fallback.image)
   })
 
+  it('uses the same deterministic cover for a new post without a featured image', () => {
+    const article = transformWordPressPost({
+      ...post,
+      slug: 'new-story-without-a-featured-image',
+      featured_media: 0,
+      _embedded: { 'wp:term': post._embedded['wp:term'] },
+    })
+
+    expect(article.image).toEqual(articles[0].image)
+  })
+
   it('keeps listing payloads free of full article bodies', () => {
     const summary = toArticleSummary(transformWordPressPost(post))
 

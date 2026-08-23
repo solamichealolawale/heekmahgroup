@@ -5,6 +5,7 @@
   "scripts": {
     "audit:seo": "node scripts/audit-seo.mjs",
     "build": "nuxt build",
+    "cms:validate": "jiti scripts/validate-wordpress-cms.ts",
     "content:export": "jiti scripts/export-wordpress-seed.ts",
     "dev": "nuxt dev",
     "format": "prettier --write .",

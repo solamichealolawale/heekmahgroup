@@ -27,7 +27,7 @@ function escapeXml(value: string): string {
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig(event)
   const siteUrl = config.public.siteUrl.replace(/\/$/, '')
-  const articles = await getWordPressArticles(config.public.wordpressUrl, config.cmsEnabled)
+  const articles = await getWordPressArticles(config.public.wordpressUrl, config.cmsEnabled, !config.cmsStrict)
   const pageEntries = pagePaths.map((path) => `<url><loc>${escapeXml(`${siteUrl}${path}`)}</loc></url>`)
   const articleEntries = articles.map(
     (article) =>
