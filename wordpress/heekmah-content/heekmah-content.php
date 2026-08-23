@@ -141,16 +141,20 @@ function heekmah_content_cache_public_post_response($response, WP_REST_Server $s
     if (
         $request->get_method() !== WP_REST_Server::READABLE ||
         is_user_logged_in() ||
-        strpos($request->get_route(), '/wp/v2/posts') !== 0
+        $request->get_route() !== '/wp/v2/posts'
     ) {
         return $response;
     }
 
     $rest_response = rest_ensure_response($response);
 
-    if ($rest_response instanceof WP_REST_Response) {
+    if (
+        $rest_response instanceof WP_REST_Response &&
+        $rest_response->get_status() >= 200 &&
+        $rest_response->get_status() < 300
+    ) {
         $rest_response->header('Cache-Control', 'public, max-age=30, stale-while-revalidate=120');
-        $rest_response->header('Vary', 'Origin');
+        $rest_response->header('Vary', 'Origin, Cookie, Authorization');
     }
 
     return $rest_response;
