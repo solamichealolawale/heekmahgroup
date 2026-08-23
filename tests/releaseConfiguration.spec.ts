@@ -12,6 +12,13 @@ describe('cPanel production packaging', () => {
     expect(script).toContain('if [[ -e "${archive_path}" ]]')
   })
 
+  it('bypasses shared CMS caches during strict generation', async () => {
+    const composable = await readFile(resolve(process.cwd(), 'app/composables/useCmsContent.ts'), 'utf8')
+
+    expect(composable).toContain('heekmah_refresh: config.cmsStrict ? Date.now() : getCmsRefreshToken()')
+    expect(composable).toContain("cache: config.cmsStrict ? 'no-store' : undefined")
+  })
+
   it('preserves WordPress directories before matching generated Nuxt routes', async () => {
     const rules = await readFile(resolve(process.cwd(), 'deploy/cpanel/live.htaccess'), 'utf8')
 

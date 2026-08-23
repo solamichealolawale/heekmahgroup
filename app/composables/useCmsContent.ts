@@ -18,6 +18,10 @@ export async function useCmsContent<T>(key: string, fallback: T): Promise<Comput
 
       try {
         const candidate = await $fetch<unknown>(`${wordpressUrl}/wp-json/heekmah/v1/content/${key}`, {
+          query: {
+            heekmah_refresh: config.cmsStrict ? Date.now() : getCmsRefreshToken(),
+          },
+          cache: config.cmsStrict ? 'no-store' : undefined,
           timeout: 12_000,
           retry: 1,
         })

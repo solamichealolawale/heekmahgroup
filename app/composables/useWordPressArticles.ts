@@ -67,12 +67,12 @@ export async function useWordPressArticleSummaries(): Promise<ComputedRef<readon
   return computed<readonly ArticleSummary[]>(() => data.value ?? fallbackSummaries)
 }
 
-export async function useWordPressArticle(slug: string): Promise<ComputedRef<ArticleContent | undefined>> {
+export async function useWordPressArticle(slug: string): Promise<ComputedRef<ArticleContent | null>> {
   const config = useRuntimeConfig()
   const wordpressUrl = config.public.wordpressUrl.replace(/\/$/, '')
-  const fallback = fallbackArticles.find((article) => article.slug === slug)
+  const fallback = fallbackArticles.find((article) => article.slug === slug) ?? null
 
-  const articleRequest = useAsyncData<ArticleContent | undefined>(
+  const articleRequest = useAsyncData<ArticleContent | null>(
     `wordpress-post:${slug}`,
     async () => {
       if (!import.meta.server || !config.cmsEnabled) return fallback
@@ -85,7 +85,7 @@ export async function useWordPressArticle(slug: string): Promise<ComputedRef<Art
           throw new Error(`WordPress did not return the expected published article: ${slug}.`)
         }
 
-        return latestArticle
+        return latestArticle ?? null
       } catch (error) {
         if (config.cmsStrict) throw error
 
@@ -101,7 +101,7 @@ export async function useWordPressArticle(slug: string): Promise<ComputedRef<Art
 
   if (import.meta.client && config.public.cmsEnabled) {
     onMounted(async () => {
-      let latestArticle: ArticleContent | undefined
+      let latestArticle: ArticleContent | null | undefined
 
       try {
         const [, { getWordPressArticleForBrowser }] = await Promise.all([
@@ -128,5 +128,5 @@ export async function useWordPressArticle(slug: string): Promise<ComputedRef<Art
 
   if (import.meta.server && config.cmsStrict && error.value) throw error.value
 
-  return computed<ArticleContent | undefined>(() => data.value ?? fallback)
+  return computed<ArticleContent | null>(() => data.value ?? fallback)
 }

@@ -140,11 +140,9 @@ watch(slideCount, (count) => {
           nuxt-sizes="100vw sm:600px md:640px lg:42vw xl:570px"
           :fetch-priority="index === 0 ? 'high' : 'low'"
           :loading="index === 0 ? 'eager' : 'lazy'"
-          :preload="index === 0"
         />
         <figcaption class="carousel-slide-copy">
-          <h2>{{ slide.title }}</h2>
-          <p>{{ slide.description }}</p>
+          <span class="carousel-slide-title">{{ slide.title }}</span>
         </figcaption>
       </figure>
 
@@ -280,7 +278,7 @@ watch(slideCount, (count) => {
   position: absolute;
   z-index: 0;
   inset: 0;
-  background: linear-gradient(180deg, rgba(8, 18, 11, 0.04) 28%, rgba(8, 18, 11, 0.88) 100%);
+  background: linear-gradient(180deg, rgba(8, 18, 11, 0.02) 48%, rgba(8, 18, 11, 0.8) 100%);
   content: '';
 }
 
@@ -293,25 +291,15 @@ watch(slideCount, (count) => {
   color: white;
 }
 
-.carousel-slide-copy h2 {
-  max-width: 19ch;
-  margin-bottom: 12px;
+.carousel-slide-title {
+  max-width: 28ch;
+  display: block;
   color: inherit;
-  font-family: var(--font-display);
-  font-size: clamp(1.65rem, 3vw, 2.55rem);
-  font-weight: 600;
-  letter-spacing: -0.035em;
-  line-height: 1.03;
+  font-size: clamp(1rem, 1.6vw, 1.35rem);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.18;
   text-wrap: balance;
-}
-
-.carousel-slide-copy p {
-  max-width: 52ch;
-  margin: 0;
-  color: rgba(255, 255, 255, 0.82);
-  font-size: clamp(0.82rem, 1.2vw, 0.94rem);
-  line-height: 1.5;
-  text-wrap: pretty;
 }
 
 .carousel-controls,
@@ -340,8 +328,8 @@ watch(slideCount, (count) => {
 .carousel-pause,
 .carousel-dot {
   display: grid;
-  min-width: 40px;
-  min-height: 40px;
+  min-width: 44px;
+  min-height: 44px;
   padding: 0;
   border: 0;
   place-items: center;

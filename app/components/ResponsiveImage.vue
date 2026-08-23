@@ -12,6 +12,7 @@ const props = withDefaults(
     fetchPriority?: 'auto' | 'high' | 'low'
     preload?: boolean
     nuxtSizes?: string
+    maxWidth?: number
   }>(),
   {
     loading: 'lazy',
@@ -22,7 +23,23 @@ const props = withDefaults(
 
 const isLocalAsset = computed(() => props.asset.src.startsWith('/'))
 const fallbackMedia = wordpressMedia as Record<string, { readonly attachmentId: number; readonly srcSet: string }>
-const responsiveSrcSet = computed(() => props.asset.srcSet || fallbackMedia[props.asset.src]?.srcSet)
+const responsiveSrcSet = computed(() => {
+  const srcSet = props.asset.srcSet || fallbackMedia[props.asset.src]?.srcSet
+  const maxWidth = props.maxWidth
+
+  if (!srcSet || !maxWidth) return srcSet
+
+  const candidates = srcSet
+    .split(',')
+    .map((candidate) => candidate.trim())
+    .filter((candidate) => {
+      const width = candidate.match(/\s(\d+)w$/)?.[1]
+
+      return !width || Number(width) <= maxWidth
+    })
+
+  return candidates.length ? candidates.join(', ') : srcSet
+})
 </script>
 
 <template>

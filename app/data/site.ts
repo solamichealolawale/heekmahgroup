@@ -30,6 +30,7 @@ export const siteContent = {
     addressLines: ['No. 40, IBM Haruna Crescent,', 'Utako, Abuja'],
   },
   legalLinks: [
+    { label: 'Privacy', to: '/privacy-policy/' },
     { label: 'Terms', to: '/terms-conditon/' },
     { label: 'Refund policy', to: '/refund_returns/' },
   ],

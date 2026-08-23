@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { articles } from '~/data/articles'
 import { toArticleSummary } from '~/utils/articles'
+import { isSafeWordPressPostSlug } from '~/utils/wordpressPostValidation'
 import { sanitizeWordPressContent, transformWordPressPost, type WordPressPost } from '../server/utils/wordpressPosts'
 
 const post = {
@@ -118,5 +119,11 @@ describe('WordPress Posts adapter', () => {
     )
 
     expect(html).toBe('<p>Useful text</p><img alt="" loading="lazy" decoding="async" />')
+  })
+
+  it('reserves every static public route from conflicting WordPress post slugs', () => {
+    expect(isSafeWordPressPostSlug('privacy-policy')).toBe(false)
+    expect(isSafeWordPressPostSlug('media')).toBe(false)
+    expect(isSafeWordPressPostSlug('a-valid-field-update')).toBe(true)
   })
 })

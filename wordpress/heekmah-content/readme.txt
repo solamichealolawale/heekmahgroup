@@ -2,7 +2,7 @@
 Contributors: heekmahgroup
 Requires at least: 6.4
 Requires PHP: 8.0
-Stable tag: 1.5.0
+Stable tag: 1.6.0
 
 Structured content fields and a read-only public REST API for the Heekmah Nuxt website.
 
@@ -11,6 +11,8 @@ The API exposes WordPress-generated responsive image candidates so the Nuxt fron
 Version 1.3 uses native WordPress Posts for the Nuxt blog and removes the old duplicate Articles editor from the Heekmah Content menu. Existing stored data is left untouched but is no longer used by the public site.
 
 Version 1.5 restores the original per-slide homepage headings and descriptions as editable fields, and retires the former fifth slide.
+
+Version 1.6 updates the homepage conversion prompt for its new final-page position, turns slider headlines into concise image captions, adds editable Blog and article conversion sections, and removes retired controls while preserving later editorial changes.
 
 == Installation ==
 

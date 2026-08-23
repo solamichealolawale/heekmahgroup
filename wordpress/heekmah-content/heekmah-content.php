@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Heekmah Structured Content
  * Description: Structured page content and a public REST API for the Heekmah Nuxt website.
- * Version: 1.5.0
+ * Version: 1.6.0
  * Author: Heekmah Group
  * Requires at least: 6.4
  * Requires PHP: 8.0
@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('HEEKMAH_CONTENT_VERSION', '1.5.0');
+define('HEEKMAH_CONTENT_VERSION', '1.6.0');
 define('HEEKMAH_CONTENT_DIR', plugin_dir_path(__FILE__));
 
 /**
@@ -28,6 +28,7 @@ function heekmah_content_keys(): array
         'services' => 'Integral Services',
         'contact' => 'Contact page',
         'blog' => 'Blog page',
+        'privacy' => 'Privacy policy',
         'terms' => 'Terms',
         'refunds' => 'Refund policy',
     );
@@ -173,6 +174,142 @@ function heekmah_content_migrate_home_slides($slides)
     return $migrated;
 }
 
+/**
+ * Move the homepage conversion copy from an opening prompt to a clear final
+ * decision point without overwriting later editorial changes.
+ *
+ * @param mixed $conversion
+ * @return mixed
+ */
+function heekmah_content_migrate_home_conversion($conversion)
+{
+    if (!is_array($conversion)) {
+        return $conversion;
+    }
+
+    if (($conversion['eyebrow'] ?? '') === 'Start here') {
+        $conversion['eyebrow'] = 'Next steps';
+    }
+
+    if (($conversion['title'] ?? '') === 'How can we help?') {
+        $conversion['title'] = 'Talk to the right team';
+    }
+
+    return $conversion;
+}
+
+/**
+ * Replace the former promotional slider headlines with short image captions.
+ * Exact-title matching preserves anything an editor has already rewritten.
+ *
+ * @param mixed $slides
+ * @return mixed
+ */
+function heekmah_content_migrate_home_slide_captions($slides)
+{
+    if (!is_array($slides)) {
+        return $slides;
+    }
+
+    $captions = array(
+        8739 => array(
+            'from' => 'Innovative Solutions for Sustainable Agriculture',
+            'to' => 'Farm mechanisation',
+        ),
+        8886 => array(
+            'from' => 'The No. 1 Choice for Healthy, Nutritious Rice',
+            'to' => 'Heekmah Rice, ready for distribution',
+        ),
+        8882 => array(
+            'from' => 'Join Our Out-Grower Program',
+            'to' => 'Supporting our out-growers',
+        ),
+        8892 => array(
+            'from' => 'Eco-Friendly Fertilizers, Chemicals, and Mechanization Services',
+            'to' => 'Crop protection in practice',
+        ),
+    );
+
+    foreach ($slides as $index => $slide) {
+        if (!is_array($slide)) {
+            continue;
+        }
+
+        $attachment_id = isset($slide['attachmentId']) ? (int) $slide['attachmentId'] : 0;
+
+        if (isset($captions[$attachment_id]) && ($slide['title'] ?? '') === $captions[$attachment_id]['from']) {
+            $slides[$index]['title'] = $captions[$attachment_id]['to'];
+        }
+    }
+
+    return $slides;
+}
+
+function heekmah_content_migrate_1_6_0(): void
+{
+    if (get_option('heekmah_content_migrated_1_6_0', false)) {
+        return;
+    }
+
+    // Restore every newly introduced field before applying exact-value copy
+    // migrations so direct upgrades from older plugin versions are ordered.
+    heekmah_content_seed_missing_options();
+
+    $option_name = heekmah_content_option_name('home');
+    $home = get_option($option_name, null);
+    $changed = false;
+
+    if (is_array($home)) {
+        if (array_key_exists('conversion', $home)) {
+            $migrated_conversion = heekmah_content_migrate_home_conversion($home['conversion']);
+
+            if ($migrated_conversion !== $home['conversion']) {
+                $home['conversion'] = $migrated_conversion;
+                $changed = true;
+            }
+        }
+
+        if (isset($home['hero']) && is_array($home['hero']) && array_key_exists('slides', $home['hero'])) {
+            $migrated_slides = heekmah_content_migrate_home_slide_captions($home['hero']['slides']);
+
+            if ($migrated_slides !== $home['hero']['slides']) {
+                $home['hero']['slides'] = $migrated_slides;
+                $changed = true;
+            }
+        }
+
+        if (array_key_exists('partnership', $home)) {
+            unset($home['partnership']);
+            $changed = true;
+        }
+
+        if ($changed) {
+            update_option($option_name, $home, false);
+        }
+    }
+
+    $site_option_name = heekmah_content_option_name('site');
+    $site = get_option($site_option_name, null);
+
+    if (is_array($site) && isset($site['legalLinks']) && is_array($site['legalLinks'])) {
+        $has_privacy_link = false;
+
+        foreach ($site['legalLinks'] as $link) {
+            if (is_array($link) && ($link['to'] ?? '') === '/privacy-policy/') {
+                $has_privacy_link = true;
+                break;
+            }
+        }
+
+        if (!$has_privacy_link) {
+            array_unshift($site['legalLinks'], array('label' => 'Privacy', 'to' => '/privacy-policy/'));
+            update_option($site_option_name, $site, false);
+        }
+    }
+
+    update_option('heekmah_content_migrated_1_6_0', true, false);
+}
+
 function heekmah_content_seed_missing_options(): void
 {
     $seed = heekmah_content_seed();
@@ -208,6 +345,7 @@ function heekmah_content_seed_missing_options(): void
 
 register_activation_hook(__FILE__, 'heekmah_content_seed_missing_options');
 add_action('admin_init', 'heekmah_content_seed_missing_options');
+add_action('init', 'heekmah_content_migrate_1_6_0', 1);
 
 function heekmah_content_register_rest_routes(): void
 {
@@ -633,6 +771,10 @@ function heekmah_content_render_field($value, array $path, $key): void
     $name = heekmah_content_field_name($path);
     $label = heekmah_content_label($key);
     $last_key = end($path);
+    $is_contact_interest_value =
+        $last_key === 'value' &&
+        ($path[0] ?? '') === 'form' &&
+        in_array('interests', $path, true);
 
     if (is_array($value) && heekmah_content_is_media($value)) {
         $attachment_id = isset($value['attachmentId']) ? absint($value['attachmentId']) : 0;
@@ -664,10 +806,7 @@ function heekmah_content_render_field($value, array $path, $key): void
                 </label>
             <?php endif; ?>
             <?php if (array_key_exists('description', $value)) : ?>
-                <label>
-                    <span>Slide description</span>
-                    <textarea name="<?php echo esc_attr($name . '[description]'); ?>" rows="4"><?php echo esc_textarea($value['description']); ?></textarea>
-                </label>
+                <input data-preserve="true" type="hidden" name="<?php echo esc_attr($name . '[description]'); ?>" value="<?php echo esc_attr($value['description']); ?>" />
             <?php endif; ?>
             <input class="heekmah-media-width" type="hidden" name="<?php echo esc_attr($name . '[width]'); ?>" value="<?php echo esc_attr($value['width']); ?>" />
             <input class="heekmah-media-height" type="hidden" name="<?php echo esc_attr($name . '[height]'); ?>" value="<?php echo esc_attr($value['height']); ?>" />
@@ -696,6 +835,9 @@ function heekmah_content_render_field($value, array $path, $key): void
     }
 
     if (is_array($value) && heekmah_content_is_list($value)) {
+        $is_locked_interest_list =
+            ($path[0] ?? '') === 'form' &&
+            $last_key === 'interests';
         ?>
         <fieldset class="heekmah-field heekmah-array-field">
             <legend><?php echo esc_html($label); ?></legend>
@@ -704,17 +846,19 @@ function heekmah_content_render_field($value, array $path, $key): void
                     <div class="heekmah-list-item" data-index="<?php echo esc_attr($index); ?>">
                         <div class="heekmah-list-toolbar">
                             <strong><?php echo esc_html(heekmah_content_label($index)); ?></strong>
-                            <div>
-                                <button class="button-link heekmah-move-up" type="button" aria-label="Move item up">↑</button>
-                                <button class="button-link heekmah-move-down" type="button" aria-label="Move item down">↓</button>
-                                <button class="button-link-delete heekmah-remove-item" type="button">Remove</button>
-                            </div>
+                            <?php if (!$is_locked_interest_list) : ?>
+                                <div>
+                                    <button class="button-link heekmah-move-up" type="button" aria-label="Move item up">↑</button>
+                                    <button class="button-link heekmah-move-down" type="button" aria-label="Move item down">↓</button>
+                                    <button class="button-link-delete heekmah-remove-item" type="button">Remove</button>
+                                </div>
+                            <?php endif; ?>
                         </div>
                         <?php heekmah_content_render_field($item, array_merge($path, array($index)), $index); ?>
                     </div>
                 <?php endforeach; ?>
             </div>
-            <?php if ($value !== array()) : ?>
+            <?php if ($value !== array() && !$is_locked_interest_list) : ?>
                 <button class="button heekmah-add-item" type="button">Add <?php echo esc_html(strtolower($label)); ?> item</button>
             <?php endif; ?>
         </fieldset>
@@ -736,7 +880,7 @@ function heekmah_content_render_field($value, array $path, $key): void
         return;
     }
 
-    if ($last_key === 'kind' || $last_key === 'id') {
+    if ($last_key === 'kind' || $last_key === 'id' || $is_contact_interest_value) {
         ?>
         <input data-preserve="true" type="hidden" name="<?php echo esc_attr($name); ?>" value="<?php echo esc_attr($value); ?>" />
         <?php

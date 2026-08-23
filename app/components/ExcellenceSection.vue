@@ -50,20 +50,18 @@ defineProps<{
 .excellence-list {
   padding: 0;
   margin: 0;
-  border-top: 1px solid var(--line);
   list-style: none;
 }
 
 .excellence-list li {
   display: grid;
   padding: 30px 0 34px;
-  border-bottom: 1px solid var(--line);
   grid-template-columns: 72px minmax(0, 1fr);
   gap: 26px;
 }
 
-.excellence-list li:last-child {
-  border-bottom: 0;
+.excellence-list li + li {
+  border-top: 1px solid var(--line);
 }
 
 .excellence-list li > span {

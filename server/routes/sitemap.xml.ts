@@ -7,6 +7,7 @@ const pagePaths = [
   '/heekmah-integral-services/',
   '/blog/',
   '/contact-us/',
+  '/privacy-policy/',
   '/terms-conditon/',
   '/refund_returns/',
 ] as const

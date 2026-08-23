@@ -206,7 +206,6 @@ export interface HomePageContent {
   readonly testimonials: TestimonialsContent
   readonly faqs: FaqContent
   readonly articles: NewsContent
-  readonly partnership: PartnershipContent
 }
 
 export interface PageHeroContent {
@@ -357,4 +356,11 @@ export interface BlogPageContent {
   }
   readonly hero: PageHeroContent
   readonly news: NewsHeaderContent
+  readonly callout: CalloutSectionContent
+  readonly articleConversion: {
+    readonly eyebrow: string
+    readonly title: string
+    readonly body: string
+    readonly action: ContentLink
+  }
 }

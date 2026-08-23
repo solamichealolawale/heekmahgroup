@@ -14,13 +14,18 @@ describe('home hero content', () => {
     ])
   })
 
-  it('pairs every retained image with its original WordPress slider copy', () => {
+  it('pairs every retained image with a concise, image-specific caption', () => {
     expect(homePageContent.hero.slides.map(({ title }) => title)).toEqual([
-      'Innovative Solutions for Sustainable Agriculture',
-      'The No. 1 Choice for Healthy, Nutritious Rice',
-      'Join Our Out-Grower Program',
-      'Eco-Friendly Fertilizers, Chemicals, and Mechanization Services',
+      'Farm mechanisation',
+      'Heekmah Rice, ready for distribution',
+      'Supporting our out-growers',
+      'Crop protection in practice',
     ])
     expect(homePageContent.hero.slides.every(({ description }) => description.length > 50)).toBe(true)
+  })
+
+  it('frames the final conversion panel as a next step instead of an opening prompt', () => {
+    expect(homePageContent.conversion.eyebrow).toBe('Next steps')
+    expect(homePageContent.conversion.title).toBe('Talk to the right team')
   })
 })

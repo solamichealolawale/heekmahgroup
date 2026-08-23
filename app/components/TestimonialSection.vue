@@ -48,7 +48,6 @@ defineProps<{
 
 .testimonial-list {
   display: grid;
-  border-top: 1px solid rgba(255, 255, 255, 0.22);
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 

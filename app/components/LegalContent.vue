@@ -17,8 +17,8 @@ defineProps<{
     </header>
 
     <div class="shell legal-layout">
-      <aside class="legal-notice" aria-label="Review status">
-        <p>Review before launch</p>
+      <aside class="legal-notice" aria-label="Important information">
+        <p>Important information</p>
         <span>{{ content.reviewNotice }}</span>
       </aside>
 

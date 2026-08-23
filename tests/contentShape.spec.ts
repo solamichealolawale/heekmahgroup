@@ -35,6 +35,36 @@ describe('matchesContentShape', () => {
     expect(matchesContentShape({ sections: [] }, reference)).toBe(false)
   })
 
+  it('rejects an empty list when the public design requires at least one item', () => {
+    expect(
+      matchesContentShape(
+        {
+          hero: { title: 'Live title', image: { src: '/live.webp', width: 1200, height: 800 } },
+          sections: [],
+        },
+        reference,
+      ),
+    ).toBe(false)
+  })
+
+  it('rejects duplicate section identifiers before they become Vue keys or anchors', () => {
+    expect(
+      matchesContentShape(
+        {
+          hero: { title: 'Live title', image: { src: '/live.webp', width: 1200, height: 800 } },
+          sections: [
+            { kind: 'callout', id: 'same-section', title: 'First', body: 'One' },
+            { kind: 'callout', id: 'same-section', title: 'Second', body: 'Two' },
+          ],
+        },
+        {
+          ...reference,
+          sections: [{ kind: 'callout', id: 'reference', title: 'Act', body: 'Now' }],
+        },
+      ),
+    ).toBe(false)
+  })
+
   it('rejects a section whose discriminator is unknown', () => {
     expect(
       matchesContentShape(
@@ -66,5 +96,27 @@ describe('matchesContentShape', () => {
     expect(matchesContentShape({ action: { label: 'Read', to: '#details' } }, actionReference)).toBe(true)
     expect(matchesContentShape({ action: { label: 'Unsafe', to: 'javascript:alert(1)' } }, actionReference)).toBe(false)
     expect(matchesContentShape({ action: { label: 'Unsafe', to: '//attacker.example' } }, actionReference)).toBe(false)
+  })
+
+  it('rejects blank required copy and invalid positive dimensions', () => {
+    expect(
+      matchesContentShape(
+        {
+          hero: { title: '   ', image: { src: '/live.webp', width: 1200, height: 800 } },
+          sections: reference.sections,
+        },
+        reference,
+      ),
+    ).toBe(false)
+    expect(
+      matchesContentShape(
+        { hero: { title: 'Live title', image: { src: '', width: 0, height: -1 } }, sections: reference.sections },
+        reference,
+      ),
+    ).toBe(false)
+  })
+
+  it('allows deliberately empty optional or decorative strings when the reference is empty', () => {
+    expect(matchesContentShape({ alt: '' }, { alt: '' })).toBe(true)
   })
 })

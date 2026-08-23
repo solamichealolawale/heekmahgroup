@@ -26,7 +26,7 @@ export const homePageContent = {
       {
         src: `${mediaBase}/2024/12/pexels-agro-oliveira-289675200-13157324-1-scaled.webp`,
         alt: 'Green agricultural machinery lined up inside a manufacturing facility',
-        title: 'Innovative Solutions for Sustainable Agriculture',
+        title: 'Farm mechanisation',
         description:
           'From premium rice production to eco-friendly farm inputs, Heekmah Group is your trusted partner in driving food security and agricultural excellence.',
         width: 2560,
@@ -36,7 +36,7 @@ export const homePageContent = {
       {
         src: `${mediaBase}/2025/01/heekah.webp`,
         alt: 'Stacked bags of Heekmah Rice ready for distribution',
-        title: 'The No. 1 Choice for Healthy, Nutritious Rice',
+        title: 'Heekmah Rice, ready for distribution',
         description:
           'Our state-of-the-art processing ensures clean, stone-free, long-grain rice for your home or business. Available in 50kg, 25kg, and 10kg packages.',
         width: 2560,
@@ -46,7 +46,7 @@ export const homePageContent = {
       {
         src: `${mediaBase}/2025/01/outgrowers.webp`,
         alt: 'Heekmah team reviewing seedlings inside a greenhouse',
-        title: 'Join Our Out-Grower Program',
+        title: 'Supporting our out-growers',
         description:
           'We support farmers with seeds, fertilizers, mechanization, and market access, ensuring improved yields and better livelihoods.',
         width: 2560,
@@ -56,7 +56,7 @@ export const homePageContent = {
       {
         src: `${mediaBase}/2025/01/chemical.webp`,
         alt: 'Crop protection work in a rice field',
-        title: 'Eco-Friendly Fertilizers, Chemicals, and Mechanization Services',
+        title: 'Crop protection in practice',
         description:
           'We support farmers with seeds, fertilizers, mechanization, and market access, ensuring improved yields and better livelihoods.',
         width: 2560,
@@ -66,8 +66,8 @@ export const homePageContent = {
     ],
   },
   conversion: {
-    eyebrow: 'Start here',
-    title: 'How can we help?',
+    eyebrow: 'Next steps',
+    title: 'Talk to the right team',
     items: [
       {
         eyebrow: 'Buy and stock',
@@ -360,24 +360,5 @@ export const homePageContent = {
         },
       },
     ],
-  },
-  partnership: {
-    eyebrow: 'Work with Heekmah',
-    title: 'Shape the future of agriculture with us',
-    body: 'Become a distributor, supplier or partner and help strengthen innovation and excellence across Nigeria’s agricultural sector.',
-    action: {
-      label: 'Start a conversation',
-      to: '/contact-us/?interest=partnership',
-    },
-    secondaryAction: {
-      label: 'Call our team',
-      to: 'tel:+2349055554302',
-    },
-    image: {
-      src: `${mediaBase}/2025/01/DRB_6375-2-2048x1402.webp`,
-      alt: 'Heekmah Group working with agricultural partners',
-      width: 2048,
-      height: 1402,
-    },
   },
 } as const satisfies HomePageContent

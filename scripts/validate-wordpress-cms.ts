@@ -3,6 +3,7 @@ import { homePageContent } from '../app/data/home'
 import {
   aboutPageContent,
   blogPageContent,
+  privacyPageContent,
   refundPageContent,
   ricePageContent,
   servicesPageContent,
@@ -13,6 +14,7 @@ import { contentShapeMismatch } from '../app/utils/contentShape'
 import { parseWordPressPageCount, parseWordPressPostArray } from '../app/utils/wordpressPostValidation'
 
 const wordpressUrl = (process.env.NUXT_PUBLIC_WORDPRESS_URL || 'https://heekmahgroup.com').replace(/\/$/, '')
+const expectedContentVersion = '1.6.0'
 const refresh = Date.now()
 const collections = {
   site: siteContent,
@@ -22,6 +24,7 @@ const collections = {
   rice: ricePageContent,
   services: servicesPageContent,
   blog: blogPageContent,
+  privacy: privacyPageContent,
   terms: termsPageContent,
   refunds: refundPageContent,
 } as const
@@ -50,10 +53,27 @@ async function validateCollection(key: keyof typeof collections): Promise<void> 
   const url = new URL(`${wordpressUrl}/wp-json/heekmah/v1/content/${key}`)
   url.searchParams.set('heekmah_refresh', String(refresh))
   const response = await fetchRequired(url, `the ${key} collection`)
+  const contentVersion = response.headers.get('x-heekmah-content-version')
+
+  if (contentVersion !== expectedContentVersion) {
+    throw new Error(
+      `WordPress returned content plugin version ${contentVersion || 'unknown'} for ${key}; expected ${expectedContentVersion}.`,
+    )
+  }
+
   const candidate: unknown = await response.json()
   const mismatch = contentShapeMismatch(candidate, collections[key])
 
   if (mismatch) throw new Error(`WordPress returned malformed ${key} content at ${mismatch}.`)
+
+  if (key === 'contact') {
+    const actualValues = (candidate as typeof contactPageContent).form.interests.map(({ value }) => value)
+    const expectedValues = contactPageContent.form.interests.map(({ value }) => value)
+
+    if (JSON.stringify(actualValues) !== JSON.stringify(expectedValues)) {
+      throw new Error('WordPress returned unsupported or reordered contact interest values.')
+    }
+  }
 }
 
 async function fetchPostPage(page: number) {

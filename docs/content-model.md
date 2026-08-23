@@ -8,7 +8,7 @@ The site-specific **Heekmah Structured Content** plugin registers the page field
 
 Saving an existing structured collection or published post updates the browser-rendered site on the visitor's next refresh; no deployment is required for that visible content change. Regenerate the static release when a new public post route is added or when updated metadata, sitemap entries or crawler-visible source HTML must ship. A protected build webhook can automate those release-only cases later.
 
-The structured API collections are `site`, `home`, `about`, `rice`, `services`, `contact`, `blog`, `terms` and `refunds`. Native WordPress Posts provide the blog entries. A static build enables WordPress fetching with `NUXT_CMS_ENABLED=true`; otherwise the reviewed bundled content is used.
+The structured API collections are `site`, `home`, `about`, `rice`, `services`, `contact`, `blog`, `privacy`, `terms` and `refunds`. Native WordPress Posts provide the blog entries. A static build enables WordPress fetching with `NUXT_CMS_ENABLED=true`; otherwise the reviewed bundled content is used.
 
 With CMS fetching enabled, the prerendered page is refreshed from WordPress after hydration. Edits to an existing page collection or published post therefore appear to visitors after a browser refresh without a new deployment. Regenerate the static site for a new post slug, updated sitemap and updated crawler/social-preview HTML.
 
@@ -30,17 +30,16 @@ Only `https://heekmahgroup.com` URLs with their canonical trailing slash appear 
 
 | Section      | Editable fields                                                                                          |
 | ------------ | -------------------------------------------------------------------------------------------------------- |
-| SEO          | Page title, meta description, social image                                                               |
-| Hero         | Eyebrow, heading, summary, two actions, highlights, two media assets, image caption                      |
-| Start here   | Eyebrow, heading, ordered conversion options with label, copy, action and measurement intent             |
-| Story        | Eyebrow, heading, body, action, media asset                                                              |
+| SEO          | Page title, meta description and social image                                                            |
+| Hero         | Eyebrow, heading, summary, two actions, highlights and four image/caption slides                         |
+| Story        | Eyebrow, heading, body, action and media asset                                                           |
 | Companies    | Eyebrow, heading, introduction, ordered company entries with descriptor, name, summary, action and media |
-| Excellence   | Eyebrow, heading, introduction, ordered principles with number, title and body                           |
-| Products     | Eyebrow, heading, archive action, ordered products with name, description, enquiry action and media      |
-| Testimonials | Eyebrow, heading, ordered quotes with attribution and role                                               |
-| FAQs         | Eyebrow, heading, ordered questions and answers                                                          |
-| News         | Eyebrow, heading, archive action; article entries are queried from WordPress posts                       |
-| Partnership  | Eyebrow, heading, body, primary and secondary actions, media asset                                       |
+| Excellence   | Eyebrow, heading, introduction and ordered principles with number, title and body                        |
+| Products     | Eyebrow, heading, archive action and ordered products with description, enquiry action and media         |
+| Testimonials | Eyebrow, heading and ordered quotes with attribution and role                                            |
+| News         | Eyebrow, heading and archive action; article entries are queried from WordPress Posts                    |
+| FAQs         | Eyebrow, heading and ordered questions and answers                                                       |
+| Next steps   | Eyebrow, heading and ordered conversion options with label, copy, action and measurement intent          |
 
 Global header, footer, contact details, navigation, editable services-menu label, header CTA, logo and legal links use a separate site-settings response. Nuxt groups the canonical Rice and Integral Services destinations beneath that label while preserving their WordPress-managed link labels. CTA links expose stable location and intent attributes so analytics can measure high-intent paths without coupling tracking code to the visual components.
 
@@ -68,8 +67,8 @@ About, Heekmah Rice and Integral Services share a structured section contract. E
 | Offerings    | Eyebrow, heading, summary, column count and ordered product/service cards    |
 | Callout      | Eyebrow, heading, body, two conversion actions and optional media            |
 
-Articles use native WordPress titles, excerpts, categories, dates, featured images and Gutenberg content. Nuxt sanitizes the rendered article HTML during generation, normalizes same-domain links and preserves responsive WordPress image candidates. Reviewed typed article fixtures remain only as an offline build fallback. Legal collections use ordered plain-language sections and carry a visible pre-launch review notice because the inherited WordPress policies were generic templates rather than approved Heekmah policy documents.
+The Blog collection controls its page hero, archive heading, final callout and the shared conversion panel shown beside every article. Articles use native WordPress titles, excerpts, categories, dates, featured images and Gutenberg content. Nuxt sanitizes the rendered article HTML during generation, normalizes same-domain links and preserves responsive WordPress image candidates. Reviewed typed article fixtures remain only as an offline build fallback. Privacy, terms and refund collections use ordered plain-language sections and an editable important-information panel.
 
 ## URL contract
 
-The rebuild keeps the current routes: `/`, `/about-us/`, `/heekmah-rice/`, `/heekmah-integral-services/`, `/blog/`, `/contact-us/`, `/terms-conditon/` and `/refund_returns/`. The legacy `/heekmah-services/` route will redirect permanently to `/heekmah-integral-services/` at cutover.
+The rebuild keeps the current routes and adds `/privacy-policy/`: `/`, `/about-us/`, `/heekmah-rice/`, `/heekmah-integral-services/`, `/blog/`, `/contact-us/`, `/privacy-policy/`, `/terms-conditon/` and `/refund_returns/`. The legacy `/heekmah-services/` route redirects permanently to `/heekmah-integral-services/`.

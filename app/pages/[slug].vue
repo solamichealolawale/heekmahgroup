@@ -43,6 +43,6 @@ usePageSeo(() => {
 </script>
 
 <template>
-  <ArticleBody v-if="pageArticle" :article="pageArticle" />
-  <NewsSection :content="relatedNews" />
+  <ArticleBody v-if="pageArticle" :article="pageArticle" :conversion="blog.articleConversion" />
+  <NewsSection v-if="pageArticle" :content="relatedNews" />
 </template>

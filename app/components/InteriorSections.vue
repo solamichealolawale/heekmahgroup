@@ -272,7 +272,6 @@ function principlesLayout(sectionId: string): PrinciplesLayout {
 
 .principles-grid {
   display: grid;
-  border-top: 1px solid var(--line);
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
@@ -688,6 +687,11 @@ function principlesLayout(sectionId: string): PrinciplesLayout {
     grid-row: auto;
   }
 
+  .purpose-layout article[data-primary='false'] {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+
   .capability-path {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 54px 28px;
@@ -726,8 +730,9 @@ function principlesLayout(sectionId: string): PrinciplesLayout {
     padding: 30px 0;
     background: transparent;
     color: inherit;
-    grid-template-columns: 64px minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto;
+    gap: 16px;
   }
 
   .purpose-layout article[data-primary='true'] {

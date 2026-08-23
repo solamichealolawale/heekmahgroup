@@ -5,10 +5,10 @@ Last verified: 23 August 2026 (Africa/Lagos)
 ## Environment
 
 - URL: `https://staging.heekmahgroup.com/`
-- cPanel document root: `/home/heekmnas/staging.heekmahgroup.com`
+- cPanel document root: the staging subdomain document root shown in cPanel
 - Deployed release: `artifacts/cpanel/heekmah-nuxt-20260822T210629Z.zip`
-- Pre-change cPanel backup: `backup-8.22.2026_06-02-46_heekmnas.tar.gz`
-- Live WordPress document root remains `/home/heekmnas/public_html` and was not changed.
+- Pre-change cPanel backup: retained in the account backup area
+- The live WordPress document root was not changed.
 
 ## Verified behavior
 

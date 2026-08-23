@@ -461,6 +461,21 @@ export const blogPageContent = {
       to: '/blog/',
     },
   },
+  callout: {
+    kind: 'callout',
+    id: 'share-an-idea',
+    eyebrow: 'Work with Heekmah',
+    title: 'Good agricultural ideas become useful through implementation.',
+    body: 'Talk to our team about research, distribution, farmer support or a commercial partnership.',
+    primaryAction: { label: 'Start a conversation', to: '/contact-us/?interest=partnership' },
+    secondaryAction: { label: 'Call +234 905 555 4302', to: 'tel:+2349055554302' },
+  },
+  articleConversion: {
+    eyebrow: 'Continue the conversation',
+    title: 'Have a related project or partnership in mind?',
+    body: 'Tell us what you are working on and where Heekmah Group may be able to contribute.',
+    action: { label: 'Talk to our team', to: '/contact-us/?interest=partnership' },
+  },
 } as const satisfies BlogPageContent
 
 export const termsPageContent = {
@@ -473,7 +488,7 @@ export const termsPageContent = {
   introduction:
     'These terms describe the basis on which visitors may use the Heekmah Group website and its published information.',
   reviewNotice:
-    'This page has been carried over from the current WordPress website and edited for clarity. It should be reviewed by Heekmah Group’s legal adviser before launch.',
+    'These website terms apply alongside any separate written terms agreed for a product order, service or commercial relationship.',
   sections: [
     {
       title: 'Using this website',
@@ -522,7 +537,7 @@ export const refundPageContent = {
   introduction:
     'This page summarises the return conditions currently published on the Heekmah Group website. Contact our team before returning any product.',
   reviewNotice:
-    'The current WordPress page is based on a generic shop template. The policy below preserves only the parts relevant to physical goods and requires operational and legal approval before launch.',
+    'Return eligibility depends on product condition, order type, delivery status and any written terms agreed for the transaction. Contact us before returning goods.',
   sections: [
     {
       title: 'Return window and eligibility',
@@ -549,6 +564,56 @@ export const refundPageContent = {
       title: 'Return delivery costs',
       paragraphs: [
         'The current policy states that customers are responsible for return delivery costs unless Heekmah Group supplied a damaged, defective or incorrect item. Delivery charges are not normally refundable.',
+      ],
+    },
+  ],
+} as const satisfies LegalPageContent
+
+export const privacyPageContent = {
+  seo: {
+    title: 'Privacy Policy | Heekmah Group',
+    description: 'How Heekmah Group handles information submitted through this website.',
+  },
+  eyebrow: 'Privacy',
+  title: 'Privacy policy',
+  introduction:
+    'This policy explains the information Heekmah Group receives through this website and how we use and protect it.',
+  reviewNotice:
+    'This notice covers the public website and enquiry form. A separate agreement may apply when you become a customer, supplier, distributor, employee or commercial partner.',
+  sections: [
+    {
+      title: 'Information we collect',
+      paragraphs: [
+        'When you send an enquiry, we collect the details you choose to provide, including your name, email address, telephone number, organisation, enquiry type and message.',
+        'The website may also process limited technical information needed to deliver pages, protect the enquiry form from misuse and understand where an enquiry was submitted. Raw IP addresses are not stored with enquiry records.',
+      ],
+    },
+    {
+      title: 'How we use your information',
+      paragraphs: [
+        'We use enquiry information to respond, route your request to the appropriate team, keep an operational record of the conversation and protect the service from abuse.',
+        'We do not sell personal information submitted through the website.',
+      ],
+    },
+    {
+      title: 'Sharing and service providers',
+      paragraphs: [
+        'Information may be handled by authorised Heekmah Group personnel and service providers that support our hosting, email or website operations. They should receive only the access needed to provide those services.',
+        'We may also disclose information where required by law or to protect people, property or legal rights.',
+      ],
+    },
+    {
+      title: 'Retention and security',
+      paragraphs: [
+        'We keep enquiry records only for as long as they are reasonably needed to respond, manage the resulting relationship, meet record-keeping obligations or resolve a dispute. Records that are no longer needed should be securely deleted during regular administrative reviews.',
+        'We limit administrative access and use reasonable technical and organisational safeguards. No internet service can guarantee absolute security.',
+      ],
+    },
+    {
+      title: 'Your choices and contact',
+      paragraphs: [
+        'You may ask about personal information you submitted, request a correction or request deletion where applicable. We may need to verify the request and may retain information that must be kept for legal or operational reasons.',
+        'Send privacy questions or requests to info@heekmahgroup.com, call +234 905 555 4302, or write to No. 40, IBM Haruna Crescent, Utako, Abuja.',
       ],
     },
   ],

@@ -66,21 +66,16 @@ defineProps<{
   color: rgba(255, 255, 255, 0.7);
 }
 
-.business-list {
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-}
-
 .business-item {
   display: grid;
   padding-block: clamp(42px, 6vw, 78px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   align-items: center;
   grid-template-columns: minmax(300px, 0.82fr) minmax(0, 1fr);
   gap: clamp(42px, 8vw, 118px);
 }
 
-.business-item:last-child {
-  border-bottom: 0;
+.business-item + .business-item {
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .business-item:nth-child(even) figure {

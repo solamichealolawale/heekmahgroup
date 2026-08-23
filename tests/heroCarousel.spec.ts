@@ -67,7 +67,9 @@ describe('HeroCarousel', () => {
     expect(renderedSlides[0].classes()).toContain('is-active')
     expect(renderedSlides[1].attributes('aria-hidden')).toBe('true')
     expect(wrapper.get('[aria-label="Show image 1"]').attributes('aria-current')).toBe('true')
-    expect(renderedSlides[0].get('h2').text()).toBe('Rice processing built for consistent quality')
+    expect(renderedSlides[0].get('.carousel-slide-title').text()).toBe('Rice processing built for consistent quality')
+    expect(renderedSlides[0].text()).not.toContain('Clean rice processing prepared for homes and businesses.')
+    expect(wrapper.find('.carousel-slide h2').exists()).toBe(false)
 
     wrapper.unmount()
   })
@@ -82,7 +84,9 @@ describe('HeroCarousel', () => {
     expect(wrapper.get('[aria-live="polite"]').text()).toBe(
       'Showing slide 2 of 4: Practical support for productive farms',
     )
-    expect(wrapper.findAll('.carousel-slide')[1].get('p').text()).toContain('Farm inputs and mechanisation')
+    expect(wrapper.findAll('.carousel-slide')[1].get('.carousel-slide-title').text()).toBe(
+      'Practical support for productive farms',
+    )
 
     wrapper.unmount()
   })

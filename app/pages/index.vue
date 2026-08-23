@@ -17,13 +17,12 @@ usePageSeo(() => ({
 
 <template>
   <HomeHero :content="content.hero" />
-  <ConversionPanel :content="content.conversion" />
   <StorySection :content="content.story" />
   <BusinessLines :content="content.businessLines" />
   <ExcellenceSection :content="content.excellence" />
   <ProductRange :content="content.products" />
   <TestimonialSection :content="content.testimonials" />
-  <FaqSection :content="content.faqs" />
   <NewsSection :content="latestNews" />
-  <PartnershipCta :content="content.partnership" />
+  <FaqSection :content="content.faqs" />
+  <ConversionPanel :content="content.conversion" />
 </template>
