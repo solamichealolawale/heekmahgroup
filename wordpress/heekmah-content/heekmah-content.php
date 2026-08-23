@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Heekmah Structured Content
  * Description: Structured page content and a public REST API for the Heekmah Nuxt website.
- * Version: 1.3.1
+ * Version: 1.3.2
  * Author: Heekmah Group
  * Requires at least: 6.4
  * Requires PHP: 8.0
@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('HEEKMAH_CONTENT_VERSION', '1.3.1');
+define('HEEKMAH_CONTENT_VERSION', '1.3.2');
 define('HEEKMAH_CONTENT_DIR', plugin_dir_path(__FILE__));
 
 /**
@@ -222,6 +222,68 @@ function heekmah_content_sanitize($value)
     return sanitize_textarea_field((string) $value);
 }
 
+/**
+ * Preserve the scalar types defined by the bundled content contract. Browser
+ * form submissions arrive as strings, including number and checkbox inputs.
+ *
+ * @param mixed $value
+ * @param mixed $default
+ * @return mixed
+ */
+function heekmah_content_normalize_types($value, $default)
+{
+    if (is_array($value)) {
+        if (!is_array($default)) {
+            return array_map(
+                static fn($item) => heekmah_content_normalize_types($item, null),
+                $value
+            );
+        }
+
+        $normalized = array();
+        $default_is_list = heekmah_content_is_list($default);
+
+        foreach ($value as $key => $item) {
+            $item_default = null;
+
+            if ($default_is_list) {
+                if (is_array($item) && isset($item['kind'])) {
+                    foreach ($default as $candidate) {
+                        if (is_array($candidate) && ($candidate['kind'] ?? null) === $item['kind']) {
+                            $item_default = $candidate;
+                            break;
+                        }
+                    }
+                }
+
+                if ($item_default === null) {
+                    $item_default = $default[$key] ?? ($default[0] ?? null);
+                }
+            } elseif (array_key_exists($key, $default)) {
+                $item_default = $default[$key];
+            }
+
+            $normalized[$key] = heekmah_content_normalize_types($item, $item_default);
+        }
+
+        return $normalized;
+    }
+
+    if (is_bool($default)) {
+        return filter_var($value, FILTER_VALIDATE_BOOLEAN);
+    }
+
+    if (is_int($default) && is_numeric($value)) {
+        return (int) $value;
+    }
+
+    if (is_float($default) && is_numeric($value)) {
+        return (float) $value;
+    }
+
+    return $value;
+}
+
 function heekmah_content_save_admin_page(): void
 {
     if (!current_user_can('manage_options')) {
@@ -237,7 +299,9 @@ function heekmah_content_save_admin_page(): void
     }
 
     $submitted = isset($_POST['heekmah_content']) ? wp_unslash($_POST['heekmah_content']) : array();
-    $sanitized = heekmah_content_sanitize($submitted);
+    $seed = heekmah_content_seed();
+    $default = $seed[$key] ?? array();
+    $sanitized = heekmah_content_normalize_types(heekmah_content_sanitize($submitted), $default);
 
     // The Home editor intentionally hides the legacy article-item fallback.
     // Preserve the stored value when saving other Home-page fields.
