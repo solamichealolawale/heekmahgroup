@@ -3,6 +3,14 @@ import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 describe('cPanel production packaging', () => {
+  it('boots in system theme mode before Vue hydrates', async () => {
+    const config = await readFile(resolve(process.cwd(), 'nuxt.config.ts'), 'utf8')
+
+    expect(config).toContain("stored==='system'")
+    expect(config).toContain("mode==='system'")
+    expect(config).toContain('document.documentElement.dataset.themeMode=mode')
+  })
+
   it('enables strict CMS validation before generating the release', async () => {
     const script = await readFile(resolve(process.cwd(), 'scripts/package-cpanel-release.sh'), 'utf8')
 

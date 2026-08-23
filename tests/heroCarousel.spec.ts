@@ -1,4 +1,6 @@
 import { mount } from '@vue/test-utils'
+import { readFile } from 'node:fs/promises'
+import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import HeroCarousel from '~/components/HeroCarousel.vue'
@@ -112,5 +114,13 @@ describe('HeroCarousel', () => {
     await pauseButton.trigger('click')
     expect(pauseButton.attributes('aria-pressed')).toBe('false')
     wrapper.unmount()
+  })
+
+  it('aligns the counter, caption and controls to one left-hand guide', async () => {
+    const source = await readFile(resolve(process.cwd(), 'app/components/HeroCarousel.vue'), 'utf8')
+
+    expect(source).toContain('--carousel-content-inset: clamp(22px, 4vw, 38px)')
+    expect(source).toContain('left: var(--carousel-content-inset)')
+    expect(source).not.toMatch(/\.carousel-controls\s*\{[^}]*\bright:/s)
   })
 })

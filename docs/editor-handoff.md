@@ -2,7 +2,7 @@
 
 ## Where to edit
 
-Sign in to WordPress, then open **Heekmah Content**. Each tab controls one public area while Nuxt keeps typography, spacing, responsive behavior, dark mode and animation consistent.
+Sign in to WordPress, then open **Heekmah Content**. Each tab controls one public area while Nuxt keeps typography, spacing, responsive behavior, theme modes and animation consistent.
 
 - **Site settings:** logo, navigation, header action, footer contact details and legal links.
 - **Home page:** SEO text, hero copy and four slider images, overview, companies, excellence, product range, testimonials, FAQs and the final next-step panel.
@@ -24,6 +24,10 @@ Open **Heekmah Content → Home page → Hero → Slides**.
 5. Save, allow up to 30 seconds, and refresh the public page.
 
 The large introduction on the left explains Heekmah Group once; slider captions identify the scene and do not repeat the introduction.
+
+## Theme modes
+
+The round theme control in the header cycles through **System → Light → Dark**. System is the default: it follows the visitor's phone or computer setting and updates automatically if that setting changes. A visitor's explicit choice is remembered on that device. Editors do not need to configure theme colours in WordPress.
 
 ## Pages and structured sections
 
@@ -58,7 +62,7 @@ WordPress owns the editable SEO title and description fields. Nuxt is the only p
 
 ## Publishing checklist
 
-- Preview the edited page on a phone and desktop in both light and dark mode.
+- Preview the edited page on a phone and desktop in System, Light and Dark mode.
 - Check that headings are concise, actions lead to the intended page and images match the surrounding copy.
 - Confirm the first and last items do not have stray separator borders.
 - For enquiries, verify a stored record and its email status after any mail configuration change.

@@ -242,6 +242,8 @@ watch(slideCount, (count) => {
 }
 
 .carousel-frame {
+  --carousel-content-inset: clamp(22px, 4vw, 38px);
+
   min-height: inherit;
   overflow: hidden;
   background: var(--brand-deep);
@@ -285,9 +287,9 @@ watch(slideCount, (count) => {
 .carousel-slide-copy {
   position: absolute;
   z-index: 1;
-  right: clamp(22px, 4vw, 38px);
+  right: var(--carousel-content-inset);
   bottom: 88px;
-  left: clamp(22px, 4vw, 38px);
+  left: var(--carousel-content-inset);
   color: white;
 }
 
@@ -314,7 +316,7 @@ watch(slideCount, (count) => {
 }
 
 .carousel-controls {
-  right: 18px;
+  left: var(--carousel-content-inset);
   bottom: 18px;
   min-height: 48px;
   padding: 4px;
@@ -403,7 +405,7 @@ watch(slideCount, (count) => {
 
 .carousel-meta {
   top: 18px;
-  left: 18px;
+  left: var(--carousel-content-inset);
   min-height: 42px;
   padding: 0 15px;
   gap: 10px;
@@ -425,10 +427,14 @@ watch(slideCount, (count) => {
 }
 
 @media (max-width: 560px) {
+  .carousel-frame {
+    --carousel-content-inset: 20px;
+  }
+
   .carousel-slide-copy {
-    right: 20px;
+    right: var(--carousel-content-inset);
     bottom: 76px;
-    left: 20px;
+    left: var(--carousel-content-inset);
   }
 
   .carousel-slide-copy h2 {
@@ -443,13 +449,17 @@ watch(slideCount, (count) => {
   }
 
   .carousel-controls {
-    right: 12px;
     bottom: 12px;
   }
 
   .carousel-meta {
     top: 12px;
-    left: 12px;
+  }
+}
+
+@media (max-width: 340px) {
+  .carousel-frame {
+    --carousel-content-inset: 14px;
   }
 }
 

@@ -63,7 +63,7 @@ export default defineNuxtConfig({
       script: [
         {
           innerHTML:
-            "(()=>{try{const stored=localStorage.getItem('heekmah-theme');const theme=stored==='light'||stored==='dark'?stored:matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=theme;document.querySelector('meta[name=\"theme-color\"]')?.setAttribute('content',theme==='dark'?'#101411':'#fbf9f3')}catch{}})()",
+            "(()=>{try{const stored=localStorage.getItem('heekmah-theme');const mode=stored==='light'||stored==='dark'||stored==='system'?stored:'system';const theme=mode==='system'?(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):mode;document.documentElement.dataset.themeMode=mode;document.documentElement.dataset.theme=theme;document.querySelector('meta[name=\"theme-color\"]')?.setAttribute('content',theme==='dark'?'#101411':'#fbf9f3')}catch{}})()",
         },
       ],
       link: [

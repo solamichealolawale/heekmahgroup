@@ -1,48 +1,88 @@
 <script setup lang="ts">
-type Theme = 'light' | 'dark'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
-const theme = ref<Theme>('light')
+type ThemeMode = 'system' | 'light' | 'dark'
+type ResolvedTheme = 'light' | 'dark'
+
+const themeModes: readonly ThemeMode[] = ['system', 'light', 'dark']
+const themeMode = ref<ThemeMode>('system')
+const resolvedTheme = ref<ResolvedTheme>('light')
+const announcement = ref('')
 let colorSchemeQuery: MediaQueryList | undefined
 
 useHead(() => ({
   meta: [
     {
       name: 'theme-color',
-      content: theme.value === 'dark' ? '#101411' : '#fbf9f3',
+      content: resolvedTheme.value === 'dark' ? '#101411' : '#fbf9f3',
     },
   ],
 }))
 
-function updateThemeColor(nextTheme: Theme): void {
+const nextThemeMode = computed<ThemeMode>(() => {
+  const currentIndex = themeModes.indexOf(themeMode.value)
+  return themeModes[(currentIndex + 1) % themeModes.length] ?? 'system'
+})
+
+const themeLabel = computed(() => {
+  const current = themeMode.value === 'system' ? `System (${resolvedTheme.value})` : capitalize(themeMode.value)
+  return `Theme: ${current}. Switch to ${capitalize(nextThemeMode.value)} mode`
+})
+
+function capitalize(value: ThemeMode | ResolvedTheme): string {
+  return `${value.charAt(0).toUpperCase()}${value.slice(1)}`
+}
+
+function isThemeMode(value: string | undefined | null): value is ThemeMode {
+  return value === 'system' || value === 'light' || value === 'dark'
+}
+
+function resolveTheme(mode: ThemeMode): ResolvedTheme {
+  if (mode !== 'system') return mode
+  return colorSchemeQuery?.matches ? 'dark' : 'light'
+}
+
+function updateThemeColor(nextTheme: ResolvedTheme): void {
   document
     .querySelector('meta[name="theme-color"]')
     ?.setAttribute('content', nextTheme === 'dark' ? '#101411' : '#fbf9f3')
 }
 
-function applyTheme(nextTheme: Theme, persist = false): void {
-  theme.value = nextTheme
+function applyThemeMode(nextMode: ThemeMode, persist = false): void {
+  const nextTheme = resolveTheme(nextMode)
+
+  themeMode.value = nextMode
+  resolvedTheme.value = nextTheme
+  document.documentElement.dataset.themeMode = nextMode
   document.documentElement.dataset.theme = nextTheme
   updateThemeColor(nextTheme)
 
   if (persist) {
-    localStorage.setItem('heekmah-theme', nextTheme)
+    localStorage.setItem('heekmah-theme', nextMode)
   }
 }
 
-function handleSystemThemeChange(event: MediaQueryListEvent): void {
-  if (!localStorage.getItem('heekmah-theme')) {
-    applyTheme(event.matches ? 'dark' : 'light')
+function handleSystemThemeChange(): void {
+  if (themeMode.value === 'system') {
+    applyThemeMode('system')
   }
 }
 
-function toggleTheme(): void {
-  applyTheme(theme.value === 'dark' ? 'light' : 'dark', true)
+function cycleThemeMode(): void {
+  applyThemeMode(nextThemeMode.value, true)
+  announcement.value = `${capitalize(themeMode.value)} theme selected${themeMode.value === 'system' ? `, currently using ${resolvedTheme.value}` : ''}.`
 }
 
 onMounted(() => {
   colorSchemeQuery = window.matchMedia('(prefers-color-scheme: dark)')
-  const currentTheme = document.documentElement.dataset.theme
-  applyTheme(currentTheme === 'dark' ? 'dark' : 'light')
+  const storedMode = localStorage.getItem('heekmah-theme')
+  const initialMode = isThemeMode(storedMode)
+    ? storedMode
+    : isThemeMode(document.documentElement.dataset.themeMode)
+      ? document.documentElement.dataset.themeMode
+      : 'system'
+
+  applyThemeMode(initialMode)
   colorSchemeQuery.addEventListener('change', handleSystemThemeChange)
 })
 
@@ -55,13 +95,14 @@ onBeforeUnmount(() => {
   <button
     class="theme-toggle"
     type="button"
-    :aria-label="theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
-    :title="theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
-    @click="toggleTheme"
+    :aria-label="themeLabel"
+    :title="themeLabel"
+    :data-mode="themeMode"
+    @click="cycleThemeMode"
   >
     <svg
       class="theme-icon sun-icon"
-      :data-visible="theme === 'light'"
+      :data-visible="themeMode === 'light'"
       aria-hidden="true"
       width="20"
       height="20"
@@ -78,7 +119,7 @@ onBeforeUnmount(() => {
     </svg>
     <svg
       class="theme-icon moon-icon"
-      :data-visible="theme === 'dark'"
+      :data-visible="themeMode === 'dark'"
       aria-hidden="true"
       width="20"
       height="20"
@@ -92,7 +133,20 @@ onBeforeUnmount(() => {
         stroke-width="1.5"
       />
     </svg>
+    <svg
+      class="theme-icon system-icon"
+      :data-visible="themeMode === 'system'"
+      aria-hidden="true"
+      width="20"
+      height="20"
+      viewBox="0 0 20 20"
+      fill="none"
+    >
+      <rect x="3.25" y="4" width="13.5" height="10" rx="1.75" stroke="currentColor" stroke-width="1.5" />
+      <path d="M10 14v2.5M7.5 16.5h5" stroke="currentColor" stroke-linecap="round" stroke-width="1.5" />
+    </svg>
   </button>
+  <span class="theme-announcement" aria-live="polite">{{ announcement }}</span>
 </template>
 
 <style scoped>
@@ -137,5 +191,24 @@ onBeforeUnmount(() => {
   opacity: 1;
   filter: blur(0);
   transform: translate(-50%, -50%) scale(1);
+}
+
+.theme-announcement {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle,
+  .theme-icon {
+    transition-duration: 0.01ms;
+  }
 }
 </style>
