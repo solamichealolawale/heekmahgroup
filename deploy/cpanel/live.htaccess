@@ -72,8 +72,10 @@ ErrorDocument 404 /nuxt-app/current/404.html
     Header set Cache-Control "public, max-age=86400"
   </FilesMatch>
 
-  SetEnvIf Request_URI "^/(?:_nuxt|_ipx)/" heekmah_fingerprinted_asset
-  Header set Cache-Control "public, max-age=31536000, immutable" env=heekmah_fingerprinted_asset
+  # LiteSpeed-compatible filename match for Nuxt's hashed JS, CSS and fonts.
+  <FilesMatch "(?:^|\.)[A-Za-z0-9_-]{8,}\.(?:css|js|mjs|woff2?)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
 </IfModule>
 
 <IfModule mod_expires.c>

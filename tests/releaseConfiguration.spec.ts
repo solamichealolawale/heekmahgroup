@@ -19,4 +19,17 @@ describe('cPanel production packaging', () => {
       rules.indexOf('RewriteCond %{DOCUMENT_ROOT}/nuxt-app/current/$1/index.html -f'),
     )
   })
+
+  it('keeps hashed Nuxt scripts immutable without over-caching public media', async () => {
+    const rulePaths = ['deploy/cpanel/live.htaccess', 'deploy/cpanel/staging.htaccess']
+
+    for (const rulePath of rulePaths) {
+      const rules = await readFile(resolve(process.cwd(), rulePath), 'utf8')
+
+      expect(rules).toContain('[A-Za-z0-9_-]{8,}\\.(?:css|js|mjs|woff2?)')
+      expect(rules).toContain('max-age=31536000, immutable')
+      expect(rules).toContain('max-age=86400')
+      expect(rules).not.toContain('SetEnvIf Request_URI')
+    }
+  })
 })
