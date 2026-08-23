@@ -81,11 +81,12 @@ defineProps<{
   min-height: 300px;
   display: flex;
   padding: 30px clamp(22px, 2.6vw, 36px) 32px;
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
   flex-direction: column;
 }
 
-.conversion-item + .conversion-item {
-  border-left: 1px solid rgba(255, 255, 255, 0.2);
+.conversion-item:last-child {
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .conversion-eyebrow {
@@ -170,11 +171,12 @@ defineProps<{
 
   .conversion-item {
     min-height: 250px;
-    border-left: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
   }
 
-  .conversion-item + .conversion-item {
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
+  .conversion-item:first-child {
+    border-top: 0;
   }
 }
 </style>

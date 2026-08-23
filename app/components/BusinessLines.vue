@@ -79,6 +79,10 @@ defineProps<{
   gap: clamp(42px, 8vw, 118px);
 }
 
+.business-item:last-child {
+  border-bottom: 0;
+}
+
 .business-item:nth-child(even) figure {
   order: 2;
 }
