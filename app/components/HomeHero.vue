@@ -44,7 +44,7 @@ defineProps<{
       </div>
 
       <div class="hero-media">
-        <HeroCarousel :slides="content.slides" :caption="content.imageCaption" />
+        <HeroCarousel :slides="content.slides" />
       </div>
     </div>
   </section>

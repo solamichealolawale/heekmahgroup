@@ -26,6 +26,9 @@ export const homePageContent = {
       {
         src: `${mediaBase}/2024/12/pexels-agro-oliveira-289675200-13157324-1-scaled.webp`,
         alt: 'Green agricultural machinery lined up inside a manufacturing facility',
+        title: 'Innovative Solutions for Sustainable Agriculture',
+        description:
+          'From premium rice production to eco-friendly farm inputs, Heekmah Group is your trusted partner in driving food security and agricultural excellence.',
         width: 2560,
         height: 1620,
         attachmentId: 8739,
@@ -33,6 +36,9 @@ export const homePageContent = {
       {
         src: `${mediaBase}/2025/01/heekah.webp`,
         alt: 'Stacked bags of Heekmah Rice ready for distribution',
+        title: 'The No. 1 Choice for Healthy, Nutritious Rice',
+        description:
+          'Our state-of-the-art processing ensures clean, stone-free, long-grain rice for your home or business. Available in 50kg, 25kg, and 10kg packages.',
         width: 2560,
         height: 1620,
         attachmentId: 8886,
@@ -40,6 +46,9 @@ export const homePageContent = {
       {
         src: `${mediaBase}/2025/01/outgrowers.webp`,
         alt: 'Heekmah team reviewing seedlings inside a greenhouse',
+        title: 'Join Our Out-Grower Program',
+        description:
+          'We support farmers with seeds, fertilizers, mechanization, and market access, ensuring improved yields and better livelihoods.',
         width: 2560,
         height: 1620,
         attachmentId: 8882,
@@ -47,19 +56,14 @@ export const homePageContent = {
       {
         src: `${mediaBase}/2025/01/chemical.webp`,
         alt: 'Crop protection work in a rice field',
+        title: 'Eco-Friendly Fertilizers, Chemicals, and Mechanization Services',
+        description:
+          'We support farmers with seeds, fertilizers, mechanization, and market access, ensuring improved yields and better livelihoods.',
         width: 2560,
         height: 1620,
         attachmentId: 8892,
       },
-      {
-        src: `${mediaBase}/2024/12/pexels-agro-oliveira-289675200-13157324-3-scaled.webp`,
-        alt: 'A young seedling held in a farmer’s hand',
-        width: 2560,
-        height: 1620,
-        attachmentId: 8747,
-      },
     ],
-    imageCaption: 'From field to table',
   },
   conversion: {
     eyebrow: 'Start here',

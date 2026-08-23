@@ -8,12 +8,11 @@ import {
 } from '@vueuse/core'
 import { computed, onBeforeUnmount, onMounted, ref, watch, type WatchStopHandle } from 'vue'
 
-import type { MediaAsset } from '~/types/content'
+import type { HeroSlide } from '~/types/content'
 
 const props = withDefaults(
   defineProps<{
-    slides: readonly MediaAsset[]
-    caption: string
+    slides: readonly HeroSlide[]
     label?: string
     autoplay?: boolean
   }>(),
@@ -53,7 +52,9 @@ function goTo(index: number, announce = true): void {
   if (slideCount.value < 2) return
 
   activeIndex.value = normalizedIndex(index)
-  if (announce) announcement.value = `Showing slide ${activeIndex.value + 1} of ${slideCount.value}.`
+  if (announce) {
+    announcement.value = `Showing slide ${activeIndex.value + 1} of ${slideCount.value}: ${props.slides[activeIndex.value]?.title ?? ''}`
+  }
 }
 
 function showPrevious(): void {
@@ -141,6 +142,10 @@ watch(slideCount, (count) => {
           :loading="index === 0 ? 'eager' : 'lazy'"
           :preload="index === 0"
         />
+        <figcaption class="carousel-slide-copy">
+          <h2>{{ slide.title }}</h2>
+          <p>{{ slide.description }}</p>
+        </figcaption>
       </figure>
 
       <div v-if="slideCount > 1" class="carousel-controls">
@@ -190,7 +195,7 @@ watch(slideCount, (count) => {
       <div class="carousel-meta" aria-hidden="true">
         <span class="carousel-counter">{{ String(activeIndex + 1).padStart(2, '0') }}</span>
         <span class="carousel-divider" />
-        <span>{{ caption }}</span>
+        <span class="carousel-count">{{ String(slideCount).padStart(2, '0') }}</span>
       </div>
     </div>
 
@@ -269,6 +274,44 @@ watch(slideCount, (count) => {
   height: 100%;
   object-fit: cover;
   object-position: center;
+}
+
+.carousel-slide::after {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(8, 18, 11, 0.04) 28%, rgba(8, 18, 11, 0.88) 100%);
+  content: '';
+}
+
+.carousel-slide-copy {
+  position: absolute;
+  z-index: 1;
+  right: clamp(22px, 4vw, 38px);
+  bottom: 88px;
+  left: clamp(22px, 4vw, 38px);
+  color: white;
+}
+
+.carousel-slide-copy h2 {
+  max-width: 19ch;
+  margin-bottom: 12px;
+  color: inherit;
+  font-family: var(--font-display);
+  font-size: clamp(1.65rem, 3vw, 2.55rem);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.03;
+  text-wrap: balance;
+}
+
+.carousel-slide-copy p {
+  max-width: 52ch;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: clamp(0.82rem, 1.2vw, 0.94rem);
+  line-height: 1.5;
+  text-wrap: pretty;
 }
 
 .carousel-controls,
@@ -394,6 +437,23 @@ watch(slideCount, (count) => {
 }
 
 @media (max-width: 560px) {
+  .carousel-slide-copy {
+    right: 20px;
+    bottom: 76px;
+    left: 20px;
+  }
+
+  .carousel-slide-copy h2 {
+    font-size: clamp(1.45rem, 7.2vw, 2rem);
+  }
+
+  .carousel-slide-copy p {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
   .carousel-controls {
     right: 12px;
     bottom: 12px;
@@ -402,11 +462,6 @@ watch(slideCount, (count) => {
   .carousel-meta {
     top: 12px;
     left: 12px;
-  }
-
-  .carousel-meta span:last-child,
-  .carousel-divider {
-    display: none;
   }
 }
 

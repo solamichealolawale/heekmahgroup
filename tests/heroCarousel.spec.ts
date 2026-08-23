@@ -7,30 +7,32 @@ const slides = [
   {
     src: 'https://heekmahgroup.com/wp-content/uploads/slide-one.webp',
     alt: 'Heekmah rice processing activity',
+    title: 'Rice processing built for consistent quality',
+    description: 'Clean rice processing prepared for homes and businesses.',
     width: 1200,
     height: 900,
   },
   {
     src: 'https://heekmahgroup.com/wp-content/uploads/slide-two.webp',
     alt: 'Heekmah agricultural work in the field',
+    title: 'Practical support for productive farms',
+    description: 'Farm inputs and mechanisation where they are needed.',
     width: 1200,
     height: 900,
   },
   {
     src: 'https://heekmahgroup.com/wp-content/uploads/slide-three.webp',
     alt: 'Heekmah out-grower programme',
+    title: 'Out-growers working with Heekmah',
+    description: 'Partnerships that strengthen farmers and supply.',
     width: 1200,
     height: 900,
   },
   {
     src: 'https://heekmahgroup.com/wp-content/uploads/slide-four.webp',
     alt: 'Heekmah crop protection work',
-    width: 1200,
-    height: 900,
-  },
-  {
-    src: 'https://heekmahgroup.com/wp-content/uploads/slide-five.webp',
-    alt: 'A seedling held in a farmer’s hand',
+    title: 'Crop protection in the field',
+    description: 'Responsible protection for healthier farm output.',
     width: 1200,
     height: 900,
   },
@@ -46,7 +48,6 @@ function mountCarousel(autoplay = false) {
     attachTo: document.body,
     props: {
       slides,
-      caption: 'From field to table',
       autoplay,
     },
     global: {
@@ -61,11 +62,12 @@ describe('HeroCarousel', () => {
     const renderedSlides = wrapper.findAll('.carousel-slide')
 
     expect(wrapper.get('.hero-carousel').attributes('aria-roledescription')).toBe('carousel')
-    expect(renderedSlides).toHaveLength(5)
-    expect(wrapper.findAll('.carousel-dot')).toHaveLength(5)
+    expect(renderedSlides).toHaveLength(4)
+    expect(wrapper.findAll('.carousel-dot')).toHaveLength(4)
     expect(renderedSlides[0].classes()).toContain('is-active')
     expect(renderedSlides[1].attributes('aria-hidden')).toBe('true')
     expect(wrapper.get('[aria-label="Show image 1"]').attributes('aria-current')).toBe('true')
+    expect(renderedSlides[0].get('h2').text()).toBe('Rice processing built for consistent quality')
 
     wrapper.unmount()
   })
@@ -77,7 +79,10 @@ describe('HeroCarousel', () => {
 
     expect(wrapper.findAll('.carousel-slide')[1].classes()).toContain('is-active')
     expect(wrapper.get('[aria-label="Show image 2"]').attributes('aria-current')).toBe('true')
-    expect(wrapper.get('[aria-live="polite"]').text()).toBe('Showing slide 2 of 5.')
+    expect(wrapper.get('[aria-live="polite"]').text()).toBe(
+      'Showing slide 2 of 4: Practical support for productive farms',
+    )
+    expect(wrapper.findAll('.carousel-slide')[1].get('p').text()).toContain('Farm inputs and mechanisation')
 
     wrapper.unmount()
   })
@@ -88,7 +93,7 @@ describe('HeroCarousel', () => {
 
     await region.trigger('keydown', { key: 'ArrowLeft' })
 
-    expect(wrapper.findAll('.carousel-slide')[4].classes()).toContain('is-active')
+    expect(wrapper.findAll('.carousel-slide')[3].classes()).toContain('is-active')
     wrapper.unmount()
   })
 

@@ -7,6 +7,11 @@ export interface MediaAsset {
   readonly srcSet?: string
 }
 
+export interface HeroSlide extends MediaAsset {
+  readonly title: string
+  readonly description: string
+}
+
 export interface ContentLink {
   readonly label: string
   readonly to: string
@@ -73,8 +78,7 @@ export interface HeroContent {
   readonly primaryAction: ContentLink
   readonly secondaryAction: ContentLink
   readonly highlights: readonly string[]
-  readonly slides: readonly MediaAsset[]
-  readonly imageCaption: string
+  readonly slides: readonly HeroSlide[]
 }
 
 export interface StoryContent {

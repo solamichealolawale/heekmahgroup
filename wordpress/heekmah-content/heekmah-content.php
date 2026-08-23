@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Heekmah Structured Content
  * Description: Structured page content and a public REST API for the Heekmah Nuxt website.
- * Version: 1.4.0
+ * Version: 1.5.0
  * Author: Heekmah Group
  * Requires at least: 6.4
  * Requires PHP: 8.0
@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('HEEKMAH_CONTENT_VERSION', '1.4.0');
+define('HEEKMAH_CONTENT_VERSION', '1.5.0');
 define('HEEKMAH_CONTENT_DIR', plugin_dir_path(__FILE__));
 
 /**
@@ -92,6 +92,8 @@ function heekmah_content_original_home_slides(): array
         array(
             'src' => 'https://heekmahgroup.com/wp-content/uploads/2024/12/pexels-agro-oliveira-289675200-13157324-1-scaled.webp',
             'alt' => 'Green agricultural machinery lined up inside a manufacturing facility',
+            'title' => 'Innovative Solutions for Sustainable Agriculture',
+            'description' => 'From premium rice production to eco-friendly farm inputs, Heekmah Group is your trusted partner in driving food security and agricultural excellence.',
             'width' => 2560,
             'height' => 1620,
             'attachmentId' => 8739,
@@ -99,6 +101,8 @@ function heekmah_content_original_home_slides(): array
         array(
             'src' => 'https://heekmahgroup.com/wp-content/uploads/2025/01/heekah.webp',
             'alt' => 'Stacked bags of Heekmah Rice ready for distribution',
+            'title' => 'The No. 1 Choice for Healthy, Nutritious Rice',
+            'description' => 'Our state-of-the-art processing ensures clean, stone-free, long-grain rice for your home or business. Available in 50kg, 25kg, and 10kg packages.',
             'width' => 2560,
             'height' => 1620,
             'attachmentId' => 8886,
@@ -106,6 +110,8 @@ function heekmah_content_original_home_slides(): array
         array(
             'src' => 'https://heekmahgroup.com/wp-content/uploads/2025/01/outgrowers.webp',
             'alt' => 'Heekmah team reviewing seedlings inside a greenhouse',
+            'title' => 'Join Our Out-Grower Program',
+            'description' => 'We support farmers with seeds, fertilizers, mechanization, and market access, ensuring improved yields and better livelihoods.',
             'width' => 2560,
             'height' => 1620,
             'attachmentId' => 8882,
@@ -113,18 +119,58 @@ function heekmah_content_original_home_slides(): array
         array(
             'src' => 'https://heekmahgroup.com/wp-content/uploads/2025/01/chemical.webp',
             'alt' => 'Crop protection work in a rice field',
+            'title' => 'Eco-Friendly Fertilizers, Chemicals, and Mechanization Services',
+            'description' => 'We support farmers with seeds, fertilizers, mechanization, and market access, ensuring improved yields and better livelihoods.',
             'width' => 2560,
             'height' => 1620,
             'attachmentId' => 8892,
         ),
-        array(
-            'src' => 'https://heekmahgroup.com/wp-content/uploads/2024/12/pexels-agro-oliveira-289675200-13157324-3-scaled.webp',
-            'alt' => 'A young seedling held in a farmer’s hand',
-            'width' => 2560,
-            'height' => 1620,
-            'attachmentId' => 8747,
-        ),
     );
+}
+
+/**
+ * Add the preserved Prime Slider copy to legacy slide records and remove the
+ * retired fifth slide once. Later editor-created slides remain untouched.
+ *
+ * @param mixed $slides
+ * @return mixed
+ */
+function heekmah_content_migrate_home_slides($slides)
+{
+    if (!is_array($slides)) {
+        return $slides;
+    }
+
+    $defaults_by_id = array();
+
+    foreach (heekmah_content_original_home_slides() as $default_slide) {
+        $defaults_by_id[(int) $default_slide['attachmentId']] = $default_slide;
+    }
+
+    $migrated = array();
+
+    foreach ($slides as $slide) {
+        if (!is_array($slide)) {
+            $migrated[] = $slide;
+            continue;
+        }
+
+        $attachment_id = isset($slide['attachmentId']) ? (int) $slide['attachmentId'] : 0;
+        $is_legacy_slide = !array_key_exists('title', $slide) && !array_key_exists('description', $slide);
+
+        if ($is_legacy_slide && $attachment_id === 8747) {
+            continue;
+        }
+
+        if ($is_legacy_slide && isset($defaults_by_id[$attachment_id])) {
+            $slide['title'] = $defaults_by_id[$attachment_id]['title'];
+            $slide['description'] = $defaults_by_id[$attachment_id]['description'];
+        }
+
+        $migrated[] = $slide;
+    }
+
+    return $migrated;
 }
 
 function heekmah_content_seed_missing_options(): void
@@ -149,7 +195,8 @@ function heekmah_content_seed_missing_options(): void
                     $merged['hero']['slides'] = heekmah_content_original_home_slides();
                 }
 
-                unset($merged['hero']['primaryImage'], $merged['hero']['secondaryImage']);
+                $merged['hero']['slides'] = heekmah_content_migrate_home_slides($merged['hero']['slides']);
+                unset($merged['hero']['primaryImage'], $merged['hero']['secondaryImage'], $merged['hero']['imageCaption']);
             }
 
             if ($merged !== $current) {
@@ -610,6 +657,18 @@ function heekmah_content_render_field($value, array $path, $key): void
                 <span>Alternative text</span>
                 <input class="heekmah-media-alt" type="text" name="<?php echo esc_attr($name . '[alt]'); ?>" value="<?php echo esc_attr($value['alt']); ?>" />
             </label>
+            <?php if (array_key_exists('title', $value)) : ?>
+                <label>
+                    <span>Slide title</span>
+                    <input type="text" name="<?php echo esc_attr($name . '[title]'); ?>" value="<?php echo esc_attr($value['title']); ?>" />
+                </label>
+            <?php endif; ?>
+            <?php if (array_key_exists('description', $value)) : ?>
+                <label>
+                    <span>Slide description</span>
+                    <textarea name="<?php echo esc_attr($name . '[description]'); ?>" rows="4"><?php echo esc_textarea($value['description']); ?></textarea>
+                </label>
+            <?php endif; ?>
             <input class="heekmah-media-width" type="hidden" name="<?php echo esc_attr($name . '[width]'); ?>" value="<?php echo esc_attr($value['width']); ?>" />
             <input class="heekmah-media-height" type="hidden" name="<?php echo esc_attr($name . '[height]'); ?>" value="<?php echo esc_attr($value['height']); ?>" />
             <input class="heekmah-media-id" type="hidden" name="<?php echo esc_attr($name . '[attachmentId]'); ?>" value="<?php echo esc_attr($attachment_id); ?>" />
