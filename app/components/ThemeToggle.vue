@@ -25,7 +25,7 @@ const nextThemeMode = computed<ThemeMode>(() => {
 })
 
 const themeLabel = computed(() => {
-  const current = themeMode.value === 'system' ? `System (${resolvedTheme.value})` : capitalize(themeMode.value)
+  const current = capitalize(themeMode.value)
   return `Theme: ${current}. Switch to ${capitalize(nextThemeMode.value)} mode`
 })
 

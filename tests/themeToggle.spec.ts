@@ -50,7 +50,7 @@ describe('ThemeToggle', () => {
     await wrapper.vm.$nextTick()
 
     expect(wrapper.get('button').attributes('data-mode')).toBe('system')
-    expect(wrapper.get('button').attributes('aria-label')).toContain('System (dark)')
+    expect(wrapper.get('button').attributes('aria-label')).toBe('Theme: System. Switch to Light mode')
     expect(document.documentElement.dataset.theme).toBe('dark')
 
     system.setDark(false)
