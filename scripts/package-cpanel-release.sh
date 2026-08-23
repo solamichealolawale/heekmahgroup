@@ -7,6 +7,11 @@ release_id="${1:-$(date -u +%Y%m%dT%H%M%SZ)}"
 artifact_dir="${project_root}/artifacts/cpanel"
 archive_path="${artifact_dir}/heekmah-nuxt-${release_id}.zip"
 
+if [[ -e "${archive_path}" ]]; then
+  printf '%s\n' "Refusing to update existing release archive: ${archive_path}" >&2
+  exit 1
+fi
+
 cd "${project_root}"
 
 export NUXT_CMS_ENABLED=true

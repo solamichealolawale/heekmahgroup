@@ -42,6 +42,30 @@ export interface WordPressPost {
 
 export type WordPressSummaryPost = Omit<WordPressPost, 'content'>
 
+const reservedPostSlugs = new Set([
+  '_heekmah',
+  '_ipx',
+  '_nuxt',
+  'about-us',
+  'blog',
+  'contact-us',
+  'heekmah-integral-services',
+  'heekmah-rice',
+  'heekmah-services',
+  'nuxt-app',
+  'refund_returns',
+  'terms-conditon',
+  'wp-admin',
+  'wp-content',
+  'wp-includes',
+  'wp-json',
+  'wp-login',
+])
+
+export function isSafeWordPressPostSlug(slug: string): boolean {
+  return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) && !reservedPostSlugs.has(slug)
+}
+
 export function parseWordPressPageCount(value: string | null | undefined): number {
   const pageCount = Number(value ?? 1)
 
@@ -104,6 +128,7 @@ function isWordPressPost(value: unknown, requireContent: boolean): boolean {
   return (
     typeof value.id === 'number' &&
     typeof value.slug === 'string' &&
+    isSafeWordPressPostSlug(value.slug) &&
     typeof value.date === 'string' &&
     typeof value.modified === 'string' &&
     isRenderedField(value.title) &&

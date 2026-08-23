@@ -45,6 +45,7 @@ export default defineNuxtConfig({
         '/contact-us/',
         '/terms-conditon/',
         '/refund_returns/',
+        '/_heekmah/article-routes.json',
         '/sitemap.xml',
       ],
     },

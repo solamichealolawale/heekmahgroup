@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Heekmah Structured Content
  * Description: Structured page content and a public REST API for the Heekmah Nuxt website.
- * Version: 1.3.2
+ * Version: 1.3.3
  * Author: Heekmah Group
  * Requires at least: 6.4
  * Requires PHP: 8.0
@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('HEEKMAH_CONTENT_VERSION', '1.3.2');
+define('HEEKMAH_CONTENT_VERSION', '1.3.3');
 define('HEEKMAH_CONTENT_DIR', plugin_dir_path(__FILE__));
 
 /**
@@ -222,6 +222,63 @@ function heekmah_content_sanitize($value)
     return sanitize_textarea_field((string) $value);
 }
 
+function heekmah_content_destination_is_safe(string $destination): bool
+{
+    $destination = trim($destination);
+
+    if ($destination === '' || preg_match('/[\x00-\x1F\x7F]/', $destination) || strpos($destination, '\\') !== false) {
+        return false;
+    }
+
+    if (strpos($destination, '#') === 0) {
+        return strlen($destination) > 1;
+    }
+
+    if (strpos($destination, '/') === 0) {
+        return strpos($destination, '//') !== 0;
+    }
+
+    $scheme = strtolower((string) wp_parse_url($destination, PHP_URL_SCHEME));
+
+    if ($scheme === 'https') {
+        return wp_http_validate_url($destination) !== false;
+    }
+
+    if ($scheme === 'mailto') {
+        $address = substr($destination, strlen('mailto:'));
+        return $address !== '' && sanitize_email($address) === $address;
+    }
+
+    if ($scheme === 'tel') {
+        $number = substr($destination, strlen('tel:'));
+        return $number !== '' && preg_match('/^\+?[0-9(). -]+$/', $number) === 1;
+    }
+
+    return false;
+}
+
+/**
+ * @param mixed $value
+ */
+function heekmah_content_has_unsafe_destination($value): bool
+{
+    if (!is_array($value)) {
+        return false;
+    }
+
+    foreach ($value as $key => $item) {
+        if ($key === 'to' && is_string($item) && !heekmah_content_destination_is_safe($item)) {
+            return true;
+        }
+
+        if (heekmah_content_has_unsafe_destination($item)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 /**
  * Preserve the scalar types defined by the bundled content contract. Browser
  * form submissions arrive as strings, including number and checkbox inputs.
@@ -302,6 +359,14 @@ function heekmah_content_save_admin_page(): void
     $seed = heekmah_content_seed();
     $default = $seed[$key] ?? array();
     $sanitized = heekmah_content_normalize_types(heekmah_content_sanitize($submitted), $default);
+
+    if (heekmah_content_has_unsafe_destination($sanitized)) {
+        wp_die(
+            esc_html__('A link destination is unsafe. Use an internal path, page fragment, HTTPS URL, email address or telephone link.', 'heekmah-content'),
+            esc_html__('Content not saved', 'heekmah-content'),
+            array('response' => 400, 'back_link' => true)
+        );
+    }
 
     // The Home editor intentionally hides the legacy article-item fallback.
     // Preserve the stored value when saving other Home-page fields.
@@ -568,12 +633,12 @@ function heekmah_content_render_admin_page(): void
             </div>
             <div class="heekmah-publish-note">
                 <strong>Publishing workflow</strong>
-                <span>Save here and refresh the public page to see the update. Regenerate only when search-crawler HTML or a new public route must change.</span>
+                <span>Save here, allow up to 30 seconds, then refresh the public page. Regenerate only when search-crawler HTML or a new public route must change.</span>
             </div>
         </header>
 
         <?php if (isset($_GET['updated'])) : ?>
-            <div class="notice notice-success is-dismissible"><p>Content saved. Visitors see the change after refreshing the Nuxt site. Regenerate the static release when SEO metadata or search-crawler HTML changes.</p></div>
+            <div class="notice notice-success is-dismissible"><p>Content saved. Visitors see the change without a rebuild after the shared freshness window of up to 30 seconds. Regenerate the static release when SEO metadata or search-crawler HTML changes.</p></div>
         <?php endif; ?>
 
         <nav class="nav-tab-wrapper" aria-label="Content areas">

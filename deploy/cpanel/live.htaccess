@@ -38,6 +38,12 @@ ErrorDocument 404 /nuxt-app/current/404.html
   # Serve the Nuxt homepage, public assets and generated route files.
   RewriteRule ^$ nuxt-app/current/index.html [L]
 
+  # Preserve real WordPress admin, core, plugin and upload files before checking
+  # generated Nuxt routes so a post slug can never shadow WordPress itself.
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
   RewriteCond %{DOCUMENT_ROOT}/nuxt-app/current/$1 -f
   RewriteRule ^(.+)$ nuxt-app/current/$1 [L]
 
@@ -48,11 +54,6 @@ ErrorDocument 404 /nuxt-app/current/404.html
 
   RewriteCond %{DOCUMENT_ROOT}/nuxt-app/current/$1/index.html -f
   RewriteRule ^(.+?)/?$ nuxt-app/current/$1/index.html [L]
-
-  # Preserve real WordPress admin, core, plugin and upload files.
-  RewriteCond %{REQUEST_FILENAME} -f [OR]
-  RewriteCond %{REQUEST_FILENAME} -d
-  RewriteRule ^ - [L]
 
   # Return the generated Nuxt 404 page with a real 404 status.
   RewriteRule ^ - [R=404,L]

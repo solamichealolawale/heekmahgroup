@@ -40,11 +40,20 @@ export async function useWordPressArticleSummaries(): Promise<ComputedRef<readon
   if (import.meta.client && config.public.cmsEnabled) {
     onMounted(async () => {
       try {
-        const [{ data }, { getWordPressArticleSummaries }] = await Promise.all([
+        const [
+          { data },
+          { filterDeployedArticleSummaries, getDeployedArticleRoutes },
+          { getWordPressArticleSummaries },
+        ] = await Promise.all([
           articleRequest,
+          import('~/utils/deployedArticleRoutes'),
           import('~/utils/wordpressPostSummaries'),
         ])
-        data.value = await getWordPressArticleSummaries(wordpressUrl)
+        const [deployedRoutes, latestSummaries] = await Promise.all([
+          getDeployedArticleRoutes(),
+          getWordPressArticleSummaries(wordpressUrl),
+        ])
+        data.value = filterDeployedArticleSummaries(latestSummaries, deployedRoutes)
       } catch (error) {
         console.warn('[Heekmah CMS] Keeping the prerendered article summaries because the live refresh failed.', error)
       }

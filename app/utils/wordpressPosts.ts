@@ -1,6 +1,7 @@
 import sanitizeHtml from 'sanitize-html'
 
-// Shared by Nitro during prerendering and by the browser when refreshing WordPress content.
+// Server-side adapter used during prerendering. Browser refreshes use the
+// smaller DOMPurify-based adapter in wordpressPostClient.ts.
 
 import { articles as fallbackArticles } from '~/data/articles'
 import type { ArticleContent, MediaAsset } from '~/types/content'
@@ -33,6 +34,7 @@ const allowedTags = [
 
 function normalizeInternalUrl(url = ''): string {
   if (!url) return url
+  if (url.startsWith('#')) return url
 
   try {
     const parsed = new URL(url, 'https://heekmahgroup.com')

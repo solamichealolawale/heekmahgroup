@@ -2,6 +2,7 @@ import DOMPurify from 'dompurify'
 
 import { articles as fallbackArticles } from '~/data/articles'
 import type { ArticleContent } from '~/types/content'
+import { getCmsRefreshToken } from '~/utils/cmsRefresh'
 import { transformWordPressPostSummary } from '~/utils/wordpressPostSummaries'
 import { parseWordPressPostArray, type WordPressPost } from '~/utils/wordpressPostValidation'
 
@@ -48,6 +49,8 @@ const forbiddenContentTags = new Set([
 ])
 
 function normalizeInternalUrl(url: string): string {
+  if (url.startsWith('#')) return url
+
   try {
     const parsed = new URL(url, 'https://heekmahgroup.com')
 
@@ -215,7 +218,7 @@ async function fetchWordPressArticleForBrowser(
       slug,
       per_page: 1,
       status: 'publish',
-      heekmah_refresh: Date.now(),
+      heekmah_refresh: getCmsRefreshToken(),
       _embed: 'wp:featuredmedia,wp:term',
       _fields: 'id,slug,date,modified,title,excerpt,content,featured_media,categories,_links,_embedded',
     },

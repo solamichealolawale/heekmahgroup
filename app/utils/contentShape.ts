@@ -1,3 +1,5 @@
+import { isSafeContentDestination } from './contentDestination'
+
 function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
@@ -51,7 +53,10 @@ export function contentShapeMismatch(candidate: unknown, reference: unknown, pat
     return undefined
   }
 
-  return typeof candidate === typeof reference ? undefined : path
+  if (typeof candidate !== typeof reference) return path
+  if (typeof candidate === 'string' && path.endsWith('.to') && !isSafeContentDestination(candidate)) return path
+
+  return undefined
 }
 
 export function matchesContentShape(candidate: unknown, reference: unknown): boolean {

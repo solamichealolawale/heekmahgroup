@@ -1,5 +1,6 @@
 import type { ComputedRef } from 'vue'
 
+import { getCmsRefreshToken } from '~/utils/cmsRefresh'
 import { contentShapeMismatch } from '~/utils/contentShape'
 
 const registeredLiveRefreshes = new Set<string>()
@@ -47,7 +48,7 @@ export async function useCmsContent<T>(key: string, fallback: T): Promise<Comput
       try {
         const { data } = await contentRequest
         const candidate = await $fetch<unknown>(`${wordpressUrl}/wp-json/heekmah/v1/content/${key}`, {
-          query: { heekmah_refresh: Date.now() },
+          query: { heekmah_refresh: getCmsRefreshToken() },
           timeout: 12_000,
           retry: 1,
         })

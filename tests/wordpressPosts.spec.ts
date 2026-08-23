@@ -18,6 +18,7 @@ const post = {
     rendered: `
       <p onclick="alert('bad')">A safe introduction.</p>
       <script>alert('bad')</script>
+      <a href="#field-notes">Field notes</a>
       <a href="https://heekmahgroup.com/heekmah-services/">Services</a>
       <a href="https://example.com/research" target="_blank">Research</a>
       <img src="https://heekmahgroup.com/wp-content/uploads/field.webp" onerror="alert('bad')" alt="Field work">
@@ -74,6 +75,7 @@ describe('WordPress Posts adapter', () => {
     expect(article.html).not.toContain('<script')
     expect(article.html).not.toContain('onclick')
     expect(article.html).not.toContain('onerror')
+    expect(article.html).toContain('href="#field-notes"')
     expect(article.html).toContain('href="/heekmah-integral-services/"')
     expect(article.html).toContain('target="_blank" rel="noopener noreferrer"')
     expect(article.html).toContain('loading="lazy" decoding="async"')

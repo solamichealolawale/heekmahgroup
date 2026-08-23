@@ -1,5 +1,6 @@
 import { articles as fallbackArticles } from '~/data/articles'
 import type { ArticleSummary, MediaAsset } from '~/types/content'
+import { getCmsRefreshToken } from '~/utils/cmsRefresh'
 import {
   parseWordPressPageCount,
   parseWordPressPostArray,
@@ -129,7 +130,7 @@ async function fetchWordPressSummaryPage(wordpressUrl: string, page: number, ref
 }
 
 async function fetchWordPressArticleSummaries(wordpressUrl: string): Promise<readonly ArticleSummary[]> {
-  const refresh = Date.now()
+  const refresh = getCmsRefreshToken()
   const firstPage = await fetchWordPressSummaryPage(wordpressUrl, 1, refresh)
   const pageCount = parseWordPressPageCount(firstPage.headers?.get('x-wp-totalpages'))
   const posts = [...firstPage.posts]

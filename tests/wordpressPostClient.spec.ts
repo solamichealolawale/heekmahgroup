@@ -14,6 +14,7 @@ const post = {
     rendered: `
       <p onclick="alert('bad')">Updated body.</p>
       <script>alert('bad')</script>
+      <a href="#field-notes">Field notes</a>
       <a href="https://www.heekmahgroup.com/heekmah-services/">Services</a>
       <a href="https://example.com/research" target="_blank">Research</a>
       <img src="https://heekmahgroup.com/wp-content/uploads/field.webp" onerror="alert('bad')">
@@ -30,6 +31,7 @@ describe('WordPress browser article adapter', () => {
     expect(html).not.toContain('<script')
     expect(html).not.toContain('onclick')
     expect(html).not.toContain('onerror')
+    expect(html).toContain('href="#field-notes"')
     expect(html).toContain('href="/heekmah-integral-services/"')
     expect(html).toContain('target="_blank" rel="noopener noreferrer"')
     expect(html).toContain('alt="" loading="lazy" decoding="async"')

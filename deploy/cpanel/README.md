@@ -39,7 +39,7 @@ Creating the subdomain, changing DNS, installing plugins and changing live routi
 6. Upload and activate `heekmah-enquiries.zip` when email delivery is ready to test.
 7. Generate production through `pnpm release:cpanel`. The release command enables strict CMS mode, validates all nine structured collections and every published post, then discovers each article route and writes those URLs into the Nuxt sitemap. If WordPress is unavailable or returns malformed content, packaging stops instead of shipping stale fallback content.
 
-The deployed browser app also refreshes existing page collections and published posts directly from WordPress after hydration. A rebuild is still required when publishing a new post URL and whenever updated HTML, metadata or sitemap content must be available to crawlers before JavaScript runs. Unpublishing or deleting a post is not complete until a new release is deployed: the browser refresh will show a 404, but the old prerendered HTML and sitemap entry remain publicly reachable to no-JavaScript clients and crawlers until that release replaces them.
+The deployed browser app also refreshes existing page collections and published posts directly from WordPress after hydration, using a shared 30-second freshness window to avoid sending a unique cache-busting request for every visitor. A rebuild is still required when publishing a new post URL and whenever updated HTML, metadata or sitemap content must be available to crawlers before JavaScript runs. Newly published posts are deliberately withheld from public listings until their generated route is deployed, so editors never create a visible broken link. Unpublishing or deleting a post is not complete until a new release is deployed: the browser refresh will show a 404, but the old prerendered HTML and sitemap entry remain publicly reachable to no-JavaScript clients and crawlers until that release replaces them.
 
 ## Live cutover
 
@@ -61,7 +61,7 @@ Neither rollback deletes a release. Keep the last known-good directory until the
 
 ## Ongoing publishing
 
-WordPress saves update browser-rendered content immediately after the visitor refreshes. Prerendered source HTML, crawler/social metadata, sitemap entries and new post routes change only after a new static build. The manual starting point is:
+WordPress saves update browser-rendered content without a rebuild; allow up to 30 seconds for the shared freshness window, then refresh the page. Prerendered source HTML, crawler/social metadata, sitemap entries and new post routes change only after a new static build. The manual starting point is:
 
 ```bash
 pnpm release:cpanel

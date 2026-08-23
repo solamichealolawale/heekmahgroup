@@ -1,6 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { articles as fallbackArticles } from '../app/data/articles'
+import { getCmsRefreshToken } from '../app/utils/cmsRefresh'
+import { filterDeployedArticleSummaries } from '../app/utils/deployedArticleRoutes'
+import { toArticleSummary } from '../app/utils/articles'
 import { getWordPressArticleSummaries } from '../app/utils/wordpressPostSummaries'
+import { parseWordPressPostArray } from '../app/utils/wordpressPostValidation'
 import { getWordPressArticle, getWordPressArticles } from '../app/utils/wordpressPosts'
 
 const summaryPost = {
@@ -86,5 +91,28 @@ describe('WordPress live refresh requests', () => {
     await expect(getWordPressArticles('https://strict-build.example', true, false)).rejects.toBe(failure)
     await expect(getWordPressArticles('https://preview-fallback.example', true, true)).resolves.not.toEqual([])
     expect(warning).toHaveBeenCalledOnce()
+  })
+
+  it('uses a bounded refresh key instead of a unique URL for every visitor', () => {
+    expect(getCmsRefreshToken(90_001)).toBe(getCmsRefreshToken(119_999))
+    expect(getCmsRefreshToken(120_000)).not.toBe(getCmsRefreshToken(119_999))
+  })
+
+  it('does not advertise WordPress posts whose route is absent from the deployed artifact', () => {
+    const summaries = [
+      { ...toArticleSummary(fallbackArticles[0]), to: '/deployed-story/' },
+      { ...toArticleSummary(fallbackArticles[0]), to: '/new-unreleased-story/' },
+    ]
+
+    expect(filterDeployedArticleSummaries(summaries, new Set(['/deployed-story/']))).toEqual([summaries[0]])
+  })
+
+  it('rejects post slugs that could shadow WordPress or Nuxt namespaces', () => {
+    expect(() => parseWordPressPostArray([{ ...summaryPost, slug: 'wp-admin' }], false)).toThrow(
+      'invalid Posts API response',
+    )
+    expect(() => parseWordPressPostArray([{ ...summaryPost, slug: '_nuxt' }], false)).toThrow(
+      'invalid Posts API response',
+    )
   })
 })

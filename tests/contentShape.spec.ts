@@ -58,4 +58,13 @@ describe('matchesContentShape', () => {
       ),
     ).toBe(true)
   })
+
+  it('rejects executable link schemes while retaining supported destinations', () => {
+    const actionReference = { action: { label: 'Contact', to: '/contact-us/' } }
+
+    expect(matchesContentShape({ action: { label: 'Call', to: 'tel:+2349055554302' } }, actionReference)).toBe(true)
+    expect(matchesContentShape({ action: { label: 'Read', to: '#details' } }, actionReference)).toBe(true)
+    expect(matchesContentShape({ action: { label: 'Unsafe', to: 'javascript:alert(1)' } }, actionReference)).toBe(false)
+    expect(matchesContentShape({ action: { label: 'Unsafe', to: '//attacker.example' } }, actionReference)).toBe(false)
+  })
 })
