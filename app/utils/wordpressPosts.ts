@@ -4,48 +4,7 @@ import sanitizeHtml from 'sanitize-html'
 
 import { articles as fallbackArticles } from '~/data/articles'
 import type { ArticleContent, MediaAsset } from '~/types/content'
-
-interface WordPressRenderedField {
-  readonly rendered: string
-  readonly protected?: boolean
-}
-
-interface WordPressMediaSize {
-  readonly source_url: string
-  readonly width: number
-  readonly height: number
-}
-
-interface WordPressMedia {
-  readonly alt_text?: string
-  readonly source_url: string
-  readonly media_details?: {
-    readonly width?: number
-    readonly height?: number
-    readonly sizes?: Readonly<Record<string, WordPressMediaSize>>
-  }
-}
-
-interface WordPressTerm {
-  readonly name: string
-  readonly taxonomy: string
-}
-
-export interface WordPressPost {
-  readonly id: number
-  readonly slug: string
-  readonly date: string
-  readonly modified: string
-  readonly title: WordPressRenderedField
-  readonly excerpt: WordPressRenderedField
-  readonly content: WordPressRenderedField
-  readonly featured_media: number
-  readonly categories: readonly number[]
-  readonly _embedded?: {
-    readonly 'wp:featuredmedia'?: readonly WordPressMedia[]
-    readonly 'wp:term'?: readonly (readonly WordPressTerm[])[]
-  }
-}
+import { parseWordPressPostArray, type WordPressMedia, type WordPressPost } from '~/utils/wordpressPostValidation'
 
 const allowedTags = [
   'p',
@@ -257,23 +216,29 @@ export function transformWordPressPost(post: WordPressPost): ArticleContent {
 }
 
 async function fetchWordPressPostPage(wordpressUrl: string, page: number) {
-  return await $fetch.raw<readonly WordPressPost[]>(`${wordpressUrl}/wp-json/wp/v2/posts`, {
+  const response = await $fetch.raw<unknown>(`${wordpressUrl}/wp-json/wp/v2/posts`, {
     query: {
       page,
       per_page: 100,
       status: 'publish',
       order: 'desc',
       orderby: 'date',
+      heekmah_refresh: Date.now(),
       _embed: 'wp:featuredmedia,wp:term',
       _fields: 'id,slug,date,modified,title,excerpt,content,featured_media,categories,_links,_embedded',
     },
     timeout: 12_000,
     retry: 1,
   })
+
+  return {
+    headers: response.headers,
+    posts: parseWordPressPostArray(response._data, true),
+  }
 }
 
 async function fetchWordPressPostBySlug(wordpressUrl: string, slug: string): Promise<ArticleContent | undefined> {
-  const response = await $fetch.raw<readonly WordPressPost[]>(`${wordpressUrl}/wp-json/wp/v2/posts`, {
+  const response = await $fetch.raw<unknown>(`${wordpressUrl}/wp-json/wp/v2/posts`, {
     query: {
       slug,
       per_page: 1,
@@ -286,7 +251,7 @@ async function fetchWordPressPostBySlug(wordpressUrl: string, slug: string): Pro
     retry: 1,
   })
 
-  const post = response._data?.[0]
+  const post = parseWordPressPostArray(response._data, true)[0]
   return post ? transformWordPressPost(post) : undefined
 }
 
@@ -304,11 +269,11 @@ async function fetchAndTransformWordPressArticles(
   try {
     const firstPage = await fetchWordPressPostPage(wordpressUrl, 1)
     const pageCount = Math.min(Number(firstPage.headers.get('x-wp-totalpages') ?? 1), 20)
-    const posts = [...(firstPage._data ?? [])]
+    const posts = [...firstPage.posts]
 
     for (let page = 2; page <= pageCount; page += 1) {
       const response = await fetchWordPressPostPage(wordpressUrl, page)
-      posts.push(...(response._data ?? []))
+      posts.push(...response.posts)
     }
 
     return posts.length || !useFallbackOnError ? posts.map(transformWordPressPost) : fallbackArticles

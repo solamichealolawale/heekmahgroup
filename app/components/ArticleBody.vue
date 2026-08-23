@@ -29,7 +29,7 @@ defineProps<{
     </figure>
 
     <div class="shell article-layout">
-      <!-- WordPress HTML is sanitized on the Nitro server before it reaches this component. -->
+      <!-- WordPress HTML is sanitized during generation and again when the browser refreshes it. -->
       <div v-if="article.html" class="article-body wordpress-article-content" v-html="article.html" />
 
       <div v-else class="article-body">

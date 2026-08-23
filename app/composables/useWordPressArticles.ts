@@ -65,9 +65,8 @@ export async function useWordPressArticle(slug: string): Promise<ComputedRef<Art
       if (!import.meta.server || !config.cmsEnabled) return fallback
 
       try {
-        const { getWordPressArticles } = await import('~/utils/wordpressPosts')
-        const latestArticles = await getWordPressArticles(wordpressUrl, true, false)
-        return latestArticles.find((article) => article.slug === slug)
+        const { getWordPressArticle } = await import('~/utils/wordpressPosts')
+        return await getWordPressArticle(wordpressUrl, slug)
       } catch (error) {
         console.warn(`[Heekmah CMS] Using the bundled ${slug} article because WordPress could not be reached.`, error)
         return fallback
@@ -81,22 +80,26 @@ export async function useWordPressArticle(slug: string): Promise<ComputedRef<Art
 
   if (import.meta.client && config.public.cmsEnabled) {
     onMounted(async () => {
+      let latestArticle: ArticleContent | undefined
+
       try {
-        const [{ data }, { getWordPressArticle }] = await Promise.all([
+        const [, { getWordPressArticleForBrowser }] = await Promise.all([
           articleRequest,
-          import('~/utils/wordpressPosts'),
+          import('~/utils/wordpressPostClient'),
         ])
-        const latestArticle = await getWordPressArticle(wordpressUrl, slug)
-
-        if (!latestArticle) {
-          showError({ statusCode: 404, statusMessage: 'Page not found' })
-          return
-        }
-
-        data.value = latestArticle
+        latestArticle = await getWordPressArticleForBrowser(wordpressUrl, slug)
       } catch (error) {
         console.warn(`[Heekmah CMS] Keeping the prerendered ${slug} article because the live refresh failed.`, error)
+        return
       }
+
+      if (!latestArticle) {
+        showError({ statusCode: 404, statusMessage: 'Page not found' })
+        return
+      }
+
+      const { data } = await articleRequest
+      data.value = latestArticle
     })
   }
 

@@ -1,8 +1,6 @@
 import { articles as fallbackArticles } from '~/data/articles'
 import type { ArticleSummary, MediaAsset } from '~/types/content'
-import type { WordPressPost } from '~/utils/wordpressPosts'
-
-type WordPressSummaryPost = Omit<WordPressPost, 'content'>
+import { parseWordPressPostArray, type WordPressSummaryPost } from '~/utils/wordpressPostValidation'
 
 function decodeHtmlEntities(value: string): string {
   const namedEntities: Readonly<Record<string, string>> = {
@@ -105,7 +103,7 @@ interface SummaryCacheEntry {
 const summaryCache = new Map<string, SummaryCacheEntry>()
 
 async function fetchWordPressArticleSummaries(wordpressUrl: string): Promise<readonly ArticleSummary[]> {
-  const response = await $fetch.raw<readonly WordPressSummaryPost[]>(`${wordpressUrl}/wp-json/wp/v2/posts`, {
+  const response = await $fetch.raw<unknown>(`${wordpressUrl}/wp-json/wp/v2/posts`, {
     query: {
       page: 1,
       per_page: 100,
@@ -120,7 +118,7 @@ async function fetchWordPressArticleSummaries(wordpressUrl: string): Promise<rea
     retry: 1,
   })
 
-  return (response._data ?? []).map(transformWordPressPostSummary)
+  return parseWordPressPostArray(response._data, false).map(transformWordPressPostSummary)
 }
 
 export async function getWordPressArticleSummaries(wordpressUrl: string): Promise<readonly ArticleSummary[]> {

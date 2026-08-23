@@ -36,4 +36,16 @@ describe('WordPress live refresh requests', () => {
     expect(options.query.per_page).toBe(100)
     expect(options.query.heekmah_refresh).toEqual(expect.any(Number))
   })
+
+  it('rejects malformed native post responses before they reach the page', async () => {
+    const raw = vi.fn().mockResolvedValue({ _data: { title: 'not a post array' } })
+    vi.stubGlobal('$fetch', { raw })
+
+    await expect(getWordPressArticle('https://malformed-detail.example', 'unsafe-story')).rejects.toThrow(
+      'invalid Posts API response',
+    )
+    await expect(getWordPressArticleSummaries('https://malformed-summaries.example')).rejects.toThrow(
+      'invalid Posts API response',
+    )
+  })
 })

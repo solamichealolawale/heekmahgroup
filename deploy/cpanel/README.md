@@ -39,7 +39,7 @@ Creating the subdomain, changing DNS, installing plugins and changing live routi
 6. Upload and activate `heekmah-enquiries.zip` when email delivery is ready to test.
 7. Generate production with `NUXT_CMS_ENABLED=true`. The build fetches every published post, discovers each article route and writes those URLs into the Nuxt sitemap. If WordPress is unavailable during a build, Nuxt logs the failure and uses the bundled reviewed content.
 
-The deployed browser app also refreshes existing page collections and published posts directly from WordPress after hydration. A rebuild is still required when publishing a new post URL and whenever updated HTML, metadata or sitemap content must be available to crawlers before JavaScript runs.
+The deployed browser app also refreshes existing page collections and published posts directly from WordPress after hydration. A rebuild is still required when publishing a new post URL and whenever updated HTML, metadata or sitemap content must be available to crawlers before JavaScript runs. Unpublishing or deleting a post is not complete until a new release is deployed: the browser refresh will show a 404, but the old prerendered HTML and sitemap entry remain publicly reachable to no-JavaScript clients and crawlers until that release replaces them.
 
 ## Live cutover
 
@@ -67,6 +67,6 @@ WordPress saves update browser-rendered content immediately after the visitor re
 NUXT_CMS_ENABLED=true pnpm release:cpanel
 ```
 
-The generated ZIP in `artifacts/cpanel` can be uploaded as `next`. A protected deployment webhook can automate this later, but it should use the same build, upload, verify and directory-swap sequence.
+The generated ZIP in `artifacts/cpanel` can be uploaded as `next-<release-id>`. A protected deployment webhook can automate this later, but it should use the same build, upload, verify and directory-swap sequence.
 
 WordPress or plugin-generated SEO tags are harmless while they remain inside the unused WordPress theme response, but they must not be copied into the Nuxt head. Nuxt owns the public metadata and sitemap; WordPress owns the editable SEO content fields.
