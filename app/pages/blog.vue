@@ -17,13 +17,13 @@ const blogCallout = {
   secondaryAction: { label: 'Call +234 905 555 4302', to: 'tel:+2349055554302' },
 } as const satisfies CalloutSectionContent
 
-usePageSeo({
+usePageSeo(() => ({
   ...content.value.seo,
   path: '/blog/',
   image: content.value.hero.image,
   schemaName: content.value.hero.title,
   schemaType: 'CollectionPage',
-})
+}))
 </script>
 
 <template>

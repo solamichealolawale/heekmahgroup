@@ -1,3 +1,5 @@
+import { toValue, type MaybeRefOrGetter } from 'vue'
+
 type JsonLdRecord = Readonly<Record<string, unknown>>
 
 function serializeJsonLd(value: JsonLdRecord): string {
@@ -7,14 +9,14 @@ function serializeJsonLd(value: JsonLdRecord): string {
     .replace(/\u2029/g, '\\u2029')
 }
 
-export function useJsonLd(key: string, value: JsonLdRecord): void {
-  useHead({
+export function useJsonLd(key: string, value: MaybeRefOrGetter<JsonLdRecord>): void {
+  useHead(() => ({
     script: [
       {
         key,
         type: 'application/ld+json',
-        innerHTML: serializeJsonLd(value),
+        innerHTML: serializeJsonLd(toValue(value)),
       },
     ],
-  })
+  }))
 }

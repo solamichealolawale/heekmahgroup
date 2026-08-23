@@ -103,10 +103,10 @@ export const homePageContent = {
           to: '/heekmah-rice/',
         },
         image: {
-          src: `${mediaBase}/2025/01/HEEKEEM-2.webp`,
-          alt: 'Packaged Heekmah rice products',
-          width: 1512,
-          height: 857,
+          src: `${mediaBase}/2024/12/IMG_4683-scaled.webp`,
+          alt: 'Stacked bags of Heekmah Rice ready for distribution',
+          width: 2560,
+          height: 1909,
         },
       },
       {

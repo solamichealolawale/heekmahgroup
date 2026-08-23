@@ -6,9 +6,11 @@ WordPress remains the private editorial system and media library. Nuxt consumes 
 
 The site-specific **Heekmah Structured Content** plugin registers the page fields and exposes them through the native REST API. This avoids Elementor, theme shortcodes and a new paid field-builder dependency. Editors change content; the Nuxt components keep layout, typography and responsive behavior consistent.
 
-Publishing remains a two-step workflow: save the structured content in WordPress, then run the static release build. Until that build is deployed, the previous generated site remains available. A protected build webhook can automate the second step later.
+Saving an existing structured collection or published post updates the browser-rendered site on the visitor's next refresh; no deployment is required for that visible content change. Regenerate the static release when a new public post route is added or when updated metadata, sitemap entries or crawler-visible source HTML must ship. A protected build webhook can automate those release-only cases later.
 
 The structured API collections are `site`, `home`, `about`, `rice`, `services`, `contact`, `blog`, `terms` and `refunds`. Native WordPress Posts provide the blog entries. A static build enables WordPress fetching with `NUXT_CMS_ENABLED=true`; otherwise the reviewed bundled content is used.
+
+With CMS fetching enabled, the prerendered page is refreshed from WordPress after hydration. Edits to an existing page collection or published post therefore appear to visitors after a browser refresh without a new deployment. Regenerate the static site for a new post slug, updated sitemap and updated crawler/social-preview HTML.
 
 ## Media contract
 

@@ -7,12 +7,12 @@ const content = await useCmsContent<HomePageContent>('home', homePageContent)
 const articles = await useWordPressArticleSummaries()
 const latestNews = computed(() => withArticleSummaries(content.value.articles, articles.value, 3))
 
-usePageSeo({
+usePageSeo(() => ({
   ...content.value.seo,
   path: '/',
   image: content.value.hero.primaryImage,
   schemaName: content.value.hero.title,
-})
+}))
 </script>
 
 <template>

@@ -16,25 +16,33 @@ const relatedNews = computed(() =>
   ),
 )
 
-const pageArticle = article.value
+const pageArticle = computed(() => article.value)
 
-if (!pageArticle) {
+if (!pageArticle.value) {
   throw createError({ statusCode: 404, statusMessage: 'Page not found' })
 }
 
-usePageSeo({
-  ...pageArticle.seo,
-  path: `/${pageArticle.slug}/`,
-  image: pageArticle.image,
-  type: 'article',
-  schemaName: pageArticle.title,
-  schemaType: 'BlogPosting',
-  datePublished: pageArticle.datePublished,
-  dateModified: pageArticle.dateModified,
+usePageSeo(() => {
+  const currentArticle = pageArticle.value
+
+  if (!currentArticle) {
+    throw createError({ statusCode: 404, statusMessage: 'Page not found' })
+  }
+
+  return {
+    ...currentArticle.seo,
+    path: `/${currentArticle.slug}/`,
+    image: currentArticle.image,
+    type: 'article',
+    schemaName: currentArticle.title,
+    schemaType: 'BlogPosting',
+    datePublished: currentArticle.datePublished,
+    dateModified: currentArticle.dateModified,
+  }
 })
 </script>
 
 <template>
-  <ArticleBody :article="pageArticle" />
+  <ArticleBody v-if="pageArticle" :article="pageArticle" />
   <NewsSection :content="relatedNews" />
 </template>

@@ -1,4 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+const cmsEnabled = process.env.NUXT_CMS_ENABLED === 'true'
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   modules: ['@nuxt/image'],
@@ -7,8 +9,9 @@ export default defineNuxtConfig({
     quality: 82,
   },
   runtimeConfig: {
-    cmsEnabled: process.env.NUXT_CMS_ENABLED === 'true',
+    cmsEnabled,
     public: {
+      cmsEnabled,
       siteUrl: 'https://heekmahgroup.com',
       wordpressUrl: 'https://heekmahgroup.com',
     },

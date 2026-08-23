@@ -4,13 +4,13 @@ import type { InteriorPageContent } from '~/types/content'
 
 const content = await useCmsContent<InteriorPageContent>('about', aboutPageContent)
 
-usePageSeo({
+usePageSeo(() => ({
   ...content.value.seo,
   path: '/about-us/',
   image: content.value.hero.image,
   schemaName: content.value.hero.title,
   schemaType: 'AboutPage',
-})
+}))
 </script>
 
 <template>

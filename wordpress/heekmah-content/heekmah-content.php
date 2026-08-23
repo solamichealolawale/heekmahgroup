@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Heekmah Structured Content
  * Description: Structured page content and a public REST API for the Heekmah Nuxt website.
- * Version: 1.3.0
+ * Version: 1.3.1
  * Author: Heekmah Group
  * Requires at least: 6.4
  * Requires PHP: 8.0
@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('HEEKMAH_CONTENT_VERSION', '1.3.0');
+define('HEEKMAH_CONTENT_VERSION', '1.3.1');
 define('HEEKMAH_CONTENT_DIR', plugin_dir_path(__FILE__));
 
 /**
@@ -504,12 +504,12 @@ function heekmah_content_render_admin_page(): void
             </div>
             <div class="heekmah-publish-note">
                 <strong>Publishing workflow</strong>
-                <span>Save here, then run the Nuxt production build. The current live build remains available until deployment completes.</span>
+                <span>Save here and refresh the public page to see the update. Regenerate only when search-crawler HTML or a new public route must change.</span>
             </div>
         </header>
 
         <?php if (isset($_GET['updated'])) : ?>
-            <div class="notice notice-success is-dismissible"><p>Content saved. Rebuild the Nuxt site to publish this change.</p></div>
+            <div class="notice notice-success is-dismissible"><p>Content saved. Visitors see the change after refreshing the Nuxt site. Regenerate the static release when SEO metadata or search-crawler HTML changes.</p></div>
         <?php endif; ?>
 
         <nav class="nav-tab-wrapper" aria-label="Content areas">
@@ -544,7 +544,7 @@ function heekmah_content_render_admin_page(): void
             </div>
 
             <div class="heekmah-save-bar">
-                <span>Changes update the content API immediately but do not replace the deployed Nuxt files.</span>
+                <span>Visible content refreshes from this API without replacing the deployed Nuxt files.</span>
                 <?php submit_button('Save content', 'primary', 'submit', false); ?>
             </div>
         </form>

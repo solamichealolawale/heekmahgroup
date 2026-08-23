@@ -6,12 +6,12 @@ import type { ContactPageContent, SiteContent } from '~/types/content'
 const content = await useCmsContent<ContactPageContent>('contact', contactPageContent)
 const site = await useCmsContent<SiteContent>('site', siteContent)
 
-usePageSeo({
+usePageSeo(() => ({
   ...content.value.seo,
   path: '/contact-us/',
   schemaName: content.value.hero.title,
   schemaType: 'ContactPage',
-})
+}))
 </script>
 
 <template>

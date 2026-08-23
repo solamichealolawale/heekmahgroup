@@ -39,6 +39,8 @@ Creating the subdomain, changing DNS, installing plugins and changing live routi
 6. Upload and activate `heekmah-enquiries.zip` when email delivery is ready to test.
 7. Generate production with `NUXT_CMS_ENABLED=true`. The build fetches every published post, discovers each article route and writes those URLs into the Nuxt sitemap. If WordPress is unavailable during a build, Nuxt logs the failure and uses the bundled reviewed content.
 
+The deployed browser app also refreshes existing page collections and published posts directly from WordPress after hydration. A rebuild is still required when publishing a new post URL and whenever updated HTML, metadata or sitemap content must be available to crawlers before JavaScript runs.
+
 ## Live cutover
 
 1. Download a full cPanel backup and save the existing `public_html/.htaccess` separately.
