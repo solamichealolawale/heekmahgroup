@@ -1,9 +1,13 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+
 import type { HeroContent } from '~/types/content'
 
-defineProps<{
+const props = defineProps<{
   content: HeroContent
 }>()
+
+const heroSlides = computed(() => [props.content.primaryImage, props.content.secondaryImage])
 </script>
 
 <template>
@@ -43,25 +47,8 @@ defineProps<{
         </ul>
       </div>
 
-      <div class="hero-media" aria-label="Heekmah Group in the field">
-        <figure class="hero-primary-image">
-          <ResponsiveImage
-            :asset="content.primaryImage"
-            sizes="(max-width: 560px) calc(100vw - 40px), (max-width: 820px) min(100vw - 80px, 640px), (max-width: 1060px) 42vw, 570px"
-            fetch-priority="high"
-            loading="eager"
-          />
-        </figure>
-        <figure class="hero-secondary-image">
-          <ResponsiveImage
-            :asset="content.secondaryImage"
-            sizes="(max-width: 560px) 38vw, 245px"
-            fetch-priority="low"
-          />
-        </figure>
-        <p class="hero-caption">
-          {{ content.imageCaption }}
-        </p>
+      <div class="hero-media">
+        <HeroCarousel :slides="heroSlides" :caption="content.imageCaption" />
       </div>
     </div>
   </section>
@@ -135,56 +122,7 @@ defineProps<{
 }
 
 .hero-media {
-  position: relative;
   min-height: 620px;
-  padding: 0 0 58px 72px;
-}
-
-.hero-primary-image,
-.hero-secondary-image {
-  margin: 0;
-}
-
-.hero-primary-image {
-  height: 570px;
-  overflow: hidden;
-}
-
-.hero-primary-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 50% 50%;
-}
-
-.hero-secondary-image {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: min(46%, 245px);
-  padding: 10px;
-  background: var(--rice-light);
-}
-
-.hero-secondary-image img {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-}
-
-.hero-caption {
-  position: absolute;
-  right: -22px;
-  bottom: 8px;
-  display: flex;
-  margin: 0;
-  align-items: flex-end;
-  flex-direction: column;
-  color: var(--earth);
-  font-family: var(--font-display);
-  font-size: 1.05rem;
-  font-style: italic;
-  line-height: 1.1;
 }
 
 @media (max-width: 1060px) {
@@ -199,11 +137,6 @@ defineProps<{
 
   .hero-media {
     min-height: 540px;
-    padding-left: 54px;
-  }
-
-  .hero-primary-image {
-    height: 490px;
   }
 }
 
@@ -222,12 +155,8 @@ defineProps<{
 
   .hero-media {
     width: min(100%, 640px);
-    min-height: 590px;
+    min-height: 560px;
     justify-self: end;
-  }
-
-  .hero-primary-image {
-    height: 540px;
   }
 }
 
@@ -255,21 +184,7 @@ defineProps<{
   }
 
   .hero-media {
-    min-height: 458px;
-    padding: 0 0 48px 26px;
-  }
-
-  .hero-primary-image {
-    height: 420px;
-  }
-
-  .hero-secondary-image {
-    width: 42%;
-    padding: 6px;
-  }
-
-  .hero-caption {
-    display: none;
+    min-height: 440px;
   }
 }
 </style>
