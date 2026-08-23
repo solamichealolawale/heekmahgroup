@@ -11,7 +11,7 @@ public_html/
 ├── wp-content/                # existing WordPress and media
 ├── nuxt-app/
 │   ├── current/               # active Nuxt static release
-│   └── previous/              # rollback copy
+│   └── previous-<release-id>/ # uniquely named rollback copies
 └── .htaccess                  # path split in live.htaccess
 ```
 
@@ -44,8 +44,8 @@ The deployed browser app also refreshes existing page collections and published 
 ## Live cutover
 
 1. Download a full cPanel backup and save the existing `public_html/.htaccess` separately.
-2. Upload and extract the new release as `public_html/nuxt-app/next`.
-3. Rename the existing `current` directory to `previous`, then rename `next` to `current`. On the first release, create `current` directly.
+2. Upload and extract the new release as `public_html/nuxt-app/next-<release-id>`.
+3. If `current` exists, rename it to `previous-<release-id>`, then rename `next-<release-id>` to `current`. Unique names prevent later cutovers from colliding with an older rollback copy. On the first release, rename the uploaded directory directly to `current`.
 4. Upload `live.htaccess` as `public_html/.htaccess` only after checking its contents against any hosting-specific rules in the existing file. Preserve host-managed PHP and SSL directives outside the rewrite block.
 5. Test `/`, every navigation route, one article, `/wp-admin/`, the structured-content REST endpoint, an upload URL, a deliberate 404, canonical tags and the enquiry form.
 6. Confirm `http://heekmahgroup.com` reaches HTTPS, `www.heekmahgroup.com` redirects to the non-`www` host, extensionless route variants gain a trailing slash, and `/heekmah-services/` redirects to `/heekmah-integral-services/`.
@@ -55,13 +55,13 @@ The deployed browser app also refreshes existing page collections and published 
 ## Rollback
 
 1. Restore the saved `.htaccess` to return all public routes to WordPress; or
-2. Rename `current` to `failed`, rename `previous` to `current`, and leave the Nuxt routing file in place.
+2. Rename `current` to `failed-<release-id>`, rename the chosen `previous-<release-id>` to `current`, and leave the Nuxt routing file in place. Always use a new failure name so rollback never overwrites an older release.
 
 Neither rollback deletes a release. Keep the last known-good directory until the new version has been stable and verified.
 
 ## Ongoing publishing
 
-WordPress saves update the structured REST content immediately, but the public Nuxt HTML changes only after a new static build. The manual starting point is:
+WordPress saves update browser-rendered content immediately after the visitor refreshes. Prerendered source HTML, crawler/social metadata, sitemap entries and new post routes change only after a new static build. The manual starting point is:
 
 ```bash
 NUXT_CMS_ENABLED=true pnpm release:cpanel

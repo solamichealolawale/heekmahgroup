@@ -1,5 +1,9 @@
 import type { ComputedRef } from 'vue'
 
+import { contentShapeMismatch } from '~/utils/contentShape'
+
+const registeredLiveRefreshes = new Set<string>()
+
 export async function useCmsContent<T>(key: string, fallback: T): Promise<ComputedRef<T>> {
   const config = useRuntimeConfig()
   const wordpressUrl = config.public.wordpressUrl.replace(/\/$/, '')
@@ -12,10 +16,17 @@ export async function useCmsContent<T>(key: string, fallback: T): Promise<Comput
       }
 
       try {
-        return (await $fetch(`${wordpressUrl}/wp-json/heekmah/v1/content/${key}`, {
+        const candidate = await $fetch<unknown>(`${wordpressUrl}/wp-json/heekmah/v1/content/${key}`, {
           timeout: 12_000,
           retry: 1,
-        })) as T
+        })
+
+        const mismatch = contentShapeMismatch(candidate, fallback)
+        if (mismatch) {
+          throw new Error(`WordPress returned malformed ${key} content at ${mismatch}.`)
+        }
+
+        return candidate as T
       } catch (error) {
         console.warn(`[Heekmah CMS] Using bundled ${key} content because WordPress could not be reached.`, error)
         return fallback
@@ -27,15 +38,24 @@ export async function useCmsContent<T>(key: string, fallback: T): Promise<Comput
     },
   )
 
-  if (import.meta.client && config.public.cmsEnabled) {
+  if (import.meta.client && config.public.cmsEnabled && !registeredLiveRefreshes.has(key)) {
+    registeredLiveRefreshes.add(key)
+
     onMounted(async () => {
       try {
         const { data } = await contentRequest
-        data.value = (await $fetch(`${wordpressUrl}/wp-json/heekmah/v1/content/${key}`, {
+        const candidate = await $fetch<unknown>(`${wordpressUrl}/wp-json/heekmah/v1/content/${key}`, {
           query: { heekmah_refresh: Date.now() },
           timeout: 12_000,
           retry: 1,
-        })) as T
+        })
+
+        const mismatch = contentShapeMismatch(candidate, fallback)
+        if (mismatch) {
+          throw new Error(`WordPress returned malformed ${key} content at ${mismatch}.`)
+        }
+
+        data.value = candidate as T
       } catch (error) {
         console.warn(`[Heekmah CMS] Keeping the prerendered ${key} content because the live refresh failed.`, error)
       }

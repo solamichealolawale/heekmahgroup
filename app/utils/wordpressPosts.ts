@@ -272,6 +272,24 @@ async function fetchWordPressPostPage(wordpressUrl: string, page: number) {
   })
 }
 
+async function fetchWordPressPostBySlug(wordpressUrl: string, slug: string): Promise<ArticleContent | undefined> {
+  const response = await $fetch.raw<readonly WordPressPost[]>(`${wordpressUrl}/wp-json/wp/v2/posts`, {
+    query: {
+      slug,
+      per_page: 1,
+      status: 'publish',
+      heekmah_refresh: Date.now(),
+      _embed: 'wp:featuredmedia,wp:term',
+      _fields: 'id,slug,date,modified,title,excerpt,content,featured_media,categories,_links,_embedded',
+    },
+    timeout: 12_000,
+    retry: 1,
+  })
+
+  const post = response._data?.[0]
+  return post ? transformWordPressPost(post) : undefined
+}
+
 interface ArticleCacheEntry {
   readonly expiresAt: number
   readonly request: Promise<readonly ArticleContent[]>
@@ -293,10 +311,7 @@ async function fetchAndTransformWordPressArticles(
       posts.push(...(response._data ?? []))
     }
 
-    if (posts.length) return posts.map(transformWordPressPost)
-    if (!useFallbackOnError) throw new Error('WordPress returned no published posts.')
-
-    return fallbackArticles
+    return posts.length || !useFallbackOnError ? posts.map(transformWordPressPost) : fallbackArticles
   } catch (error) {
     if (!useFallbackOnError) throw error
 
@@ -313,15 +328,35 @@ export async function getWordPressArticles(
   if (!cmsEnabled) return fallbackArticles
 
   const normalizedUrl = wordpressUrl.replace(/\/$/, '')
-  const cached = articleCache.get(normalizedUrl)
+  const cacheKey = `${normalizedUrl}:${useFallbackOnError ? 'fallback' : 'strict'}`
+  const cached = articleCache.get(cacheKey)
 
   if (cached && cached.expiresAt > Date.now()) return await cached.request
 
   const request = fetchAndTransformWordPressArticles(normalizedUrl, useFallbackOnError)
-  articleCache.set(normalizedUrl, {
+  articleCache.set(cacheKey, {
     expiresAt: Date.now() + 30_000,
     request,
   })
 
+  return await request
+}
+
+interface ArticleDetailCacheEntry {
+  readonly expiresAt: number
+  readonly request: Promise<ArticleContent | undefined>
+}
+
+const articleDetailCache = new Map<string, ArticleDetailCacheEntry>()
+
+export async function getWordPressArticle(wordpressUrl: string, slug: string): Promise<ArticleContent | undefined> {
+  const normalizedUrl = wordpressUrl.replace(/\/$/, '')
+  const cacheKey = `${normalizedUrl}:${slug}`
+  const cached = articleDetailCache.get(cacheKey)
+
+  if (cached && cached.expiresAt > Date.now()) return await cached.request
+
+  const request = fetchWordPressPostBySlug(normalizedUrl, slug)
+  articleDetailCache.set(cacheKey, { expiresAt: Date.now() + 30_000, request })
   return await request
 }

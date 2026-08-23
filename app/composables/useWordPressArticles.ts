@@ -19,7 +19,7 @@ export async function useWordPressArticleSummaries(): Promise<ComputedRef<readon
 
       try {
         const { getWordPressArticles } = await import('~/utils/wordpressPosts')
-        const latestArticles = await getWordPressArticles(wordpressUrl, true)
+        const latestArticles = await getWordPressArticles(wordpressUrl, true, false)
         return latestArticles.map(toArticleSummary)
       } catch (error) {
         console.warn(
@@ -38,12 +38,11 @@ export async function useWordPressArticleSummaries(): Promise<ComputedRef<readon
   if (import.meta.client && config.public.cmsEnabled) {
     onMounted(async () => {
       try {
-        const [{ data }, { getWordPressArticles }] = await Promise.all([
+        const [{ data }, { getWordPressArticleSummaries }] = await Promise.all([
           articleRequest,
-          import('~/utils/wordpressPosts'),
+          import('~/utils/wordpressPostSummaries'),
         ])
-        const latestArticles = await getWordPressArticles(wordpressUrl, true, false)
-        data.value = latestArticles.map(toArticleSummary)
+        data.value = await getWordPressArticleSummaries(wordpressUrl)
       } catch (error) {
         console.warn('[Heekmah CMS] Keeping the prerendered article summaries because the live refresh failed.', error)
       }
@@ -67,8 +66,8 @@ export async function useWordPressArticle(slug: string): Promise<ComputedRef<Art
 
       try {
         const { getWordPressArticles } = await import('~/utils/wordpressPosts')
-        const latestArticles = await getWordPressArticles(wordpressUrl, true)
-        return latestArticles.find((article) => article.slug === slug) ?? fallback
+        const latestArticles = await getWordPressArticles(wordpressUrl, true, false)
+        return latestArticles.find((article) => article.slug === slug)
       } catch (error) {
         console.warn(`[Heekmah CMS] Using the bundled ${slug} article because WordPress could not be reached.`, error)
         return fallback
@@ -83,12 +82,18 @@ export async function useWordPressArticle(slug: string): Promise<ComputedRef<Art
   if (import.meta.client && config.public.cmsEnabled) {
     onMounted(async () => {
       try {
-        const [{ data }, { getWordPressArticles }] = await Promise.all([
+        const [{ data }, { getWordPressArticle }] = await Promise.all([
           articleRequest,
           import('~/utils/wordpressPosts'),
         ])
-        const latestArticles = await getWordPressArticles(wordpressUrl, true, false)
-        data.value = latestArticles.find((article) => article.slug === slug) ?? fallback
+        const latestArticle = await getWordPressArticle(wordpressUrl, slug)
+
+        if (!latestArticle) {
+          showError({ statusCode: 404, statusMessage: 'Page not found' })
+          return
+        }
+
+        data.value = latestArticle
       } catch (error) {
         console.warn(`[Heekmah CMS] Keeping the prerendered ${slug} article because the live refresh failed.`, error)
       }
