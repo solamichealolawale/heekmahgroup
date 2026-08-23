@@ -128,6 +128,36 @@ function heekmah_content_register_rest_routes(): void
 add_action('rest_api_init', 'heekmah_content_register_rest_routes');
 
 /**
+ * Allow short shared caching for the anonymous native Post reads used by the
+ * Nuxt browser refresh. Authenticated/editor responses remain private.
+ *
+ * @param mixed $response
+ * @return mixed
+ */
+function heekmah_content_cache_public_post_response($response, WP_REST_Server $server, WP_REST_Request $request)
+{
+    unset($server);
+
+    if (
+        $request->get_method() !== WP_REST_Server::READABLE ||
+        is_user_logged_in() ||
+        strpos($request->get_route(), '/wp/v2/posts') !== 0
+    ) {
+        return $response;
+    }
+
+    $rest_response = rest_ensure_response($response);
+
+    if ($rest_response instanceof WP_REST_Response) {
+        $rest_response->header('Cache-Control', 'public, max-age=30, stale-while-revalidate=120');
+        $rest_response->header('Vary', 'Origin');
+    }
+
+    return $rest_response;
+}
+add_filter('rest_post_dispatch', 'heekmah_content_cache_public_post_response', 10, 3);
+
+/**
  * @return WP_REST_Response|WP_Error
  */
 function heekmah_content_rest_response(WP_REST_Request $request)
