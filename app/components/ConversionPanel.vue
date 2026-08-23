@@ -173,6 +173,7 @@ defineProps<{
   }
 
   .conversion-item + .conversion-item {
+    border-left: 0;
     border-top: 1px solid rgba(255, 255, 255, 0.2);
   }
 }

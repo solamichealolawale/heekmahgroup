@@ -212,6 +212,12 @@ usePageSeo(() => ({
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 24px;
   }
+
+  .location-list address + address {
+    padding-left: 24px;
+    border-top: 0;
+    border-left: 1px solid var(--line);
+  }
 }
 
 @media (max-width: 560px) {
@@ -226,6 +232,12 @@ usePageSeo(() => ({
   .location-list {
     grid-template-columns: 1fr;
     gap: 0;
+  }
+
+  .location-list address + address {
+    padding-left: 0;
+    border-top: 1px solid var(--line);
+    border-left: 0;
   }
 }
 </style>
