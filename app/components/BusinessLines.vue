@@ -62,6 +62,10 @@ defineProps<{
   color: var(--on-brand);
 }
 
+.business-heading .eyebrow {
+  color: var(--rice);
+}
+
 .business-heading .section-lead {
   color: rgba(255, 255, 255, 0.7);
 }

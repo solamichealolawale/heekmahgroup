@@ -18,12 +18,15 @@ function contrast(first: string, second: string): number {
 }
 
 describe('light theme color contrast', () => {
-  it('keeps earth-colored labels readable on the paper and rice surfaces', async () => {
+  it('keeps labels readable across light and dark brand surfaces', async () => {
     const css = await readFile(resolve(process.cwd(), 'app/assets/css/main.css'), 'utf8')
+    const businessLines = await readFile(resolve(process.cwd(), 'app/components/BusinessLines.vue'), 'utf8')
     const lightTheme = css.match(/:root\s*\{([\s\S]*?)\}/)?.[1] ?? ''
     const token = (name: string) => lightTheme.match(new RegExp(`--${name}:\\s*(#[0-9a-f]{6})`, 'i'))?.[1] ?? ''
 
     expect(contrast(token('earth'), token('paper'))).toBeGreaterThanOrEqual(4.5)
     expect(contrast(token('earth'), token('rice-light'))).toBeGreaterThanOrEqual(4.5)
+    expect(contrast(token('rice'), token('brand-solid'))).toBeGreaterThanOrEqual(4.5)
+    expect(businessLines).toMatch(/\.business-heading \.eyebrow\s*\{\s*color:\s*var\(--rice\);\s*\}/)
   })
 })
