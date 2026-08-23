@@ -10,7 +10,7 @@ const latestNews = computed(() => withArticleSummaries(content.value.articles, a
 usePageSeo(() => ({
   ...content.value.seo,
   path: '/',
-  image: content.value.hero.primaryImage,
+  image: content.value.hero.slides[0],
   schemaName: content.value.hero.title,
 }))
 </script>

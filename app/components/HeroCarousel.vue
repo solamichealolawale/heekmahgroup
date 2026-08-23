@@ -136,6 +136,7 @@ watch(slideCount, (count) => {
         <ResponsiveImage
           :asset="slide"
           sizes="(max-width: 560px) calc(100vw - 40px), (max-width: 820px) min(100vw - 80px, 640px), (max-width: 1060px) 42vw, 570px"
+          nuxt-sizes="100vw sm:600px md:640px lg:42vw xl:570px"
           :fetch-priority="index === 0 ? 'high' : 'low'"
           :loading="index === 0 ? 'eager' : 'lazy'"
           :preload="index === 0"

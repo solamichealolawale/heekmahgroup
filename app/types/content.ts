@@ -73,8 +73,7 @@ export interface HeroContent {
   readonly primaryAction: ContentLink
   readonly secondaryAction: ContentLink
   readonly highlights: readonly string[]
-  readonly primaryImage: MediaAsset
-  readonly secondaryImage: MediaAsset
+  readonly slides: readonly MediaAsset[]
   readonly imageCaption: string
 }
 

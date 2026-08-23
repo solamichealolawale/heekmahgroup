@@ -1,13 +1,9 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-
 import type { HeroContent } from '~/types/content'
 
-const props = defineProps<{
+defineProps<{
   content: HeroContent
 }>()
-
-const heroSlides = computed(() => [props.content.primaryImage, props.content.secondaryImage])
 </script>
 
 <template>
@@ -48,7 +44,7 @@ const heroSlides = computed(() => [props.content.primaryImage, props.content.sec
       </div>
 
       <div class="hero-media">
-        <HeroCarousel :slides="heroSlides" :caption="content.imageCaption" />
+        <HeroCarousel :slides="content.slides" :caption="content.imageCaption" />
       </div>
     </div>
   </section>

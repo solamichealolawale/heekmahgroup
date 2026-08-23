@@ -8,6 +8,7 @@ export default defineNuxtConfig({
   image: {
     format: ['webp'],
     quality: 82,
+    none: {},
   },
   runtimeConfig: {
     cmsEnabled,

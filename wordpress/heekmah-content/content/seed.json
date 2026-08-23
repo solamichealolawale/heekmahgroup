@@ -79,18 +79,43 @@
         "Farm inputs",
         "Mechanisation"
       ],
-      "primaryImage": {
-        "src": "https://heekmahgroup.com/wp-content/uploads/2024/12/IMG_4685-scaled.webp",
-        "alt": "Heekmah agricultural operations in Nigeria",
-        "width": 1512,
-        "height": 1123
-      },
-      "secondaryImage": {
-        "src": "https://heekmahgroup.com/wp-content/uploads/2025/01/PHOTO-2025-01-07-09-38-32-1-410x300.webp",
-        "alt": "A close view of Heekmah agricultural work",
-        "width": 410,
-        "height": 300
-      },
+      "slides": [
+        {
+          "src": "https://heekmahgroup.com/wp-content/uploads/2024/12/pexels-agro-oliveira-289675200-13157324-1-scaled.webp",
+          "alt": "Green agricultural machinery lined up inside a manufacturing facility",
+          "width": 2560,
+          "height": 1620,
+          "attachmentId": 8739
+        },
+        {
+          "src": "https://heekmahgroup.com/wp-content/uploads/2025/01/heekah.webp",
+          "alt": "Stacked bags of Heekmah Rice ready for distribution",
+          "width": 2560,
+          "height": 1620,
+          "attachmentId": 8886
+        },
+        {
+          "src": "https://heekmahgroup.com/wp-content/uploads/2025/01/outgrowers.webp",
+          "alt": "Heekmah team reviewing seedlings inside a greenhouse",
+          "width": 2560,
+          "height": 1620,
+          "attachmentId": 8882
+        },
+        {
+          "src": "https://heekmahgroup.com/wp-content/uploads/2025/01/chemical.webp",
+          "alt": "Crop protection work in a rice field",
+          "width": 2560,
+          "height": 1620,
+          "attachmentId": 8892
+        },
+        {
+          "src": "https://heekmahgroup.com/wp-content/uploads/2024/12/pexels-agro-oliveira-289675200-13157324-3-scaled.webp",
+          "alt": "A young seedling held in a farmer’s hand",
+          "width": 2560,
+          "height": 1620,
+          "attachmentId": 8747
+        }
+      ],
       "imageCaption": "From field to table"
     },
     "conversion": {

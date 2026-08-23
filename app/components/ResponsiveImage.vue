@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+
 import type { MediaAsset } from '~/types/content'
 import wordpressMedia from '~/data/wordpress-media.json'
 
@@ -9,6 +11,7 @@ const props = withDefaults(
     loading?: 'eager' | 'lazy'
     fetchPriority?: 'auto' | 'high' | 'low'
     preload?: boolean
+    nuxtSizes?: string
   }>(),
   {
     loading: 'lazy',
@@ -32,6 +35,19 @@ const responsiveSrcSet = computed(() => props.asset.srcSet || fallbackMedia[prop
     :loading="loading"
     :fetchpriority="fetchPriority"
     :preload="preload ? { fetchPriority } : false"
+    decoding="async"
+  />
+  <NuxtImg
+    v-else-if="nuxtSizes"
+    provider="none"
+    :src="asset.src"
+    :srcset="responsiveSrcSet || undefined"
+    :sizes="nuxtSizes"
+    :alt="asset.alt"
+    :width="asset.width"
+    :height="asset.height"
+    :loading="loading"
+    :fetchpriority="fetchPriority"
     decoding="async"
   />
   <img

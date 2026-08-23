@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Heekmah Structured Content
  * Description: Structured page content and a public REST API for the Heekmah Nuxt website.
- * Version: 1.3.3
+ * Version: 1.4.0
  * Author: Heekmah Group
  * Requires at least: 6.4
  * Requires PHP: 8.0
@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('HEEKMAH_CONTENT_VERSION', '1.3.3');
+define('HEEKMAH_CONTENT_VERSION', '1.4.0');
 define('HEEKMAH_CONTENT_DIR', plugin_dir_path(__FILE__));
 
 /**
@@ -80,6 +80,53 @@ function heekmah_content_merge_missing_defaults($current, $defaults)
     return $current;
 }
 
+/**
+ * Keep the original WordPress homepage slider available during upgrades from
+ * plugin versions whose bundled seed only had primary and secondary images.
+ *
+ * @return array<int, array<string, int|string>>
+ */
+function heekmah_content_original_home_slides(): array
+{
+    return array(
+        array(
+            'src' => 'https://heekmahgroup.com/wp-content/uploads/2024/12/pexels-agro-oliveira-289675200-13157324-1-scaled.webp',
+            'alt' => 'Green agricultural machinery lined up inside a manufacturing facility',
+            'width' => 2560,
+            'height' => 1620,
+            'attachmentId' => 8739,
+        ),
+        array(
+            'src' => 'https://heekmahgroup.com/wp-content/uploads/2025/01/heekah.webp',
+            'alt' => 'Stacked bags of Heekmah Rice ready for distribution',
+            'width' => 2560,
+            'height' => 1620,
+            'attachmentId' => 8886,
+        ),
+        array(
+            'src' => 'https://heekmahgroup.com/wp-content/uploads/2025/01/outgrowers.webp',
+            'alt' => 'Heekmah team reviewing seedlings inside a greenhouse',
+            'width' => 2560,
+            'height' => 1620,
+            'attachmentId' => 8882,
+        ),
+        array(
+            'src' => 'https://heekmahgroup.com/wp-content/uploads/2025/01/chemical.webp',
+            'alt' => 'Crop protection work in a rice field',
+            'width' => 2560,
+            'height' => 1620,
+            'attachmentId' => 8892,
+        ),
+        array(
+            'src' => 'https://heekmahgroup.com/wp-content/uploads/2024/12/pexels-agro-oliveira-289675200-13157324-3-scaled.webp',
+            'alt' => 'A young seedling held in a farmer’s hand',
+            'width' => 2560,
+            'height' => 1620,
+            'attachmentId' => 8747,
+        ),
+    );
+}
+
 function heekmah_content_seed_missing_options(): void
 {
     $seed = heekmah_content_seed();
@@ -96,6 +143,14 @@ function heekmah_content_seed_missing_options(): void
 
         if (is_array($current) && isset($seed[$key]) && is_array($seed[$key])) {
             $merged = heekmah_content_merge_missing_defaults($current, $seed[$key]);
+
+            if ($key === 'home' && isset($merged['hero']) && is_array($merged['hero'])) {
+                if (!array_key_exists('slides', $merged['hero'])) {
+                    $merged['hero']['slides'] = heekmah_content_original_home_slides();
+                }
+
+                unset($merged['hero']['primaryImage'], $merged['hero']['secondaryImage']);
+            }
 
             if ($merged !== $current) {
                 update_option($option_name, $merged, false);

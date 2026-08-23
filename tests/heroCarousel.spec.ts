@@ -16,6 +16,24 @@ const slides = [
     width: 1200,
     height: 900,
   },
+  {
+    src: 'https://heekmahgroup.com/wp-content/uploads/slide-three.webp',
+    alt: 'Heekmah out-grower programme',
+    width: 1200,
+    height: 900,
+  },
+  {
+    src: 'https://heekmahgroup.com/wp-content/uploads/slide-four.webp',
+    alt: 'Heekmah crop protection work',
+    width: 1200,
+    height: 900,
+  },
+  {
+    src: 'https://heekmahgroup.com/wp-content/uploads/slide-five.webp',
+    alt: 'A seedling held in a farmer’s hand',
+    width: 1200,
+    height: 900,
+  },
 ] as const
 
 const ResponsiveImageStub = {
@@ -43,7 +61,8 @@ describe('HeroCarousel', () => {
     const renderedSlides = wrapper.findAll('.carousel-slide')
 
     expect(wrapper.get('.hero-carousel').attributes('aria-roledescription')).toBe('carousel')
-    expect(renderedSlides).toHaveLength(2)
+    expect(renderedSlides).toHaveLength(5)
+    expect(wrapper.findAll('.carousel-dot')).toHaveLength(5)
     expect(renderedSlides[0].classes()).toContain('is-active')
     expect(renderedSlides[1].attributes('aria-hidden')).toBe('true')
     expect(wrapper.get('[aria-label="Show image 1"]').attributes('aria-current')).toBe('true')
@@ -58,7 +77,7 @@ describe('HeroCarousel', () => {
 
     expect(wrapper.findAll('.carousel-slide')[1].classes()).toContain('is-active')
     expect(wrapper.get('[aria-label="Show image 2"]').attributes('aria-current')).toBe('true')
-    expect(wrapper.get('[aria-live="polite"]').text()).toBe('Showing slide 2 of 2.')
+    expect(wrapper.get('[aria-live="polite"]').text()).toBe('Showing slide 2 of 5.')
 
     wrapper.unmount()
   })
@@ -69,7 +88,7 @@ describe('HeroCarousel', () => {
 
     await region.trigger('keydown', { key: 'ArrowLeft' })
 
-    expect(wrapper.findAll('.carousel-slide')[1].classes()).toContain('is-active')
+    expect(wrapper.findAll('.carousel-slide')[4].classes()).toContain('is-active')
     wrapper.unmount()
   })
 
