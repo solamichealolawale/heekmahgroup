@@ -111,7 +111,6 @@ usePageSeo(() => ({
   min-height: 54px;
   display: flex;
   padding: 10px 0;
-  border-top: 1px solid var(--line);
   align-items: flex-start;
   flex-direction: column;
   justify-content: center;
@@ -123,6 +122,10 @@ usePageSeo(() => ({
   transition-property: color;
   transition-duration: 150ms;
   transition-timing-function: var(--ease-out);
+}
+
+.direct-contact a + a {
+  border-top: 1px solid var(--line);
 }
 
 .direct-contact a span {
@@ -171,12 +174,11 @@ usePageSeo(() => ({
 
 .location-list address {
   padding: 24px 0;
-  border-top: 1px solid var(--line);
   font-style: normal;
 }
 
-.location-list address:last-child {
-  border-bottom: 1px solid var(--line);
+.location-list address + address {
+  border-top: 1px solid var(--line);
 }
 
 .location-list p {
@@ -209,11 +211,6 @@ usePageSeo(() => ({
   .location-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 24px;
-  }
-
-  .location-list address,
-  .location-list address:last-child {
-    border-bottom: 1px solid var(--line);
   }
 }
 

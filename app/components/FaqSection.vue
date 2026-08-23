@@ -50,6 +50,10 @@ details {
   border-bottom: 1px solid var(--line);
 }
 
+details:last-child {
+  border-bottom: 0;
+}
+
 summary {
   min-height: 92px;
   display: flex;

@@ -62,6 +62,10 @@ defineProps<{
   gap: 26px;
 }
 
+.excellence-list li:last-child {
+  border-bottom: 0;
+}
+
 .excellence-list li > span {
   color: var(--earth);
   font-family: var(--font-display);

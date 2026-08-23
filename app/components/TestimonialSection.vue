@@ -58,12 +58,10 @@ blockquote {
   display: flex;
   padding: 38px clamp(24px, 3vw, 42px) 34px;
   margin: 0;
-  border-right: 1px solid rgba(255, 255, 255, 0.22);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.22);
   flex-direction: column;
 }
 
-blockquote:first-child {
+blockquote + blockquote {
   border-left: 1px solid rgba(255, 255, 255, 0.22);
 }
 

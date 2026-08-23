@@ -107,6 +107,10 @@ defineProps<{
   border-bottom: 1px solid var(--line);
 }
 
+.legal-body section:last-of-type {
+  border-bottom: 0;
+}
+
 .legal-body h2 {
   margin-bottom: 18px;
   color: var(--brand-deep);

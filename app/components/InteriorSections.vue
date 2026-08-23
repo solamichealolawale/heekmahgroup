@@ -279,12 +279,14 @@ function principlesLayout(sectionId: string): PrinciplesLayout {
 .principles-grid article {
   min-height: 260px;
   padding: clamp(30px, 4.5vw, 54px);
-  border-right: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
 }
 
-.principles-grid article:nth-child(2n + 1) {
+.principles-grid article:nth-child(2n) {
   border-left: 1px solid var(--line);
+}
+
+.principles-grid article:nth-child(n + 3) {
+  border-top: 1px solid var(--line);
 }
 
 .principles-section[data-tone='brand'] .principles-grid,
@@ -330,10 +332,13 @@ function principlesLayout(sectionId: string): PrinciplesLayout {
 .purpose-layout article {
   display: grid;
   padding: clamp(26px, 4vw, 44px) 0;
-  border-top: 1px solid var(--line);
   align-content: start;
   grid-template-columns: minmax(72px, 0.22fr) minmax(0, 1fr);
   gap: clamp(18px, 3vw, 36px);
+}
+
+.purpose-layout article[data-primary='false'] + article[data-primary='false'] {
+  border-top: 1px solid var(--line);
 }
 
 .purpose-layout article[data-primary='true'] {
@@ -705,9 +710,14 @@ function principlesLayout(sectionId: string): PrinciplesLayout {
   }
 
   .principles-grid article,
-  .principles-grid article:nth-child(2n + 1) {
+  .principles-grid article:nth-child(2n) {
     min-height: 0;
-    border-left: 1px solid var(--line);
+    border-left: 0;
+  }
+
+  .principles-grid article + article,
+  .purpose-layout article + article {
+    border-top: 1px solid var(--line);
   }
 
   .purpose-layout article,
