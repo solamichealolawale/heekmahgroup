@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { articles } from '~/data/articles'
 import { toArticleSummary } from '~/utils/articles'
+import { isSafeWordPressPostSlug } from '~/utils/wordpressPostValidation'
 import { sanitizeWordPressContent, transformWordPressPost, type WordPressPost } from '../server/utils/wordpressPosts'
 
 const post = {
@@ -18,6 +19,7 @@ const post = {
     rendered: `
       <p onclick="alert('bad')">A safe introduction.</p>
       <script>alert('bad')</script>
+      <a href="#field-notes">Field notes</a>
       <a href="https://heekmahgroup.com/heekmah-services/">Services</a>
       <a href="https://example.com/research" target="_blank">Research</a>
       <img src="https://heekmahgroup.com/wp-content/uploads/field.webp" onerror="alert('bad')" alt="Field work">
@@ -74,6 +76,7 @@ describe('WordPress Posts adapter', () => {
     expect(article.html).not.toContain('<script')
     expect(article.html).not.toContain('onclick')
     expect(article.html).not.toContain('onerror')
+    expect(article.html).toContain('href="#field-notes"')
     expect(article.html).toContain('href="/heekmah-integral-services/"')
     expect(article.html).toContain('target="_blank" rel="noopener noreferrer"')
     expect(article.html).toContain('loading="lazy" decoding="async"')
@@ -91,6 +94,17 @@ describe('WordPress Posts adapter', () => {
     expect(article.image).toEqual(fallback.image)
   })
 
+  it('uses the same deterministic cover for a new post without a featured image', () => {
+    const article = transformWordPressPost({
+      ...post,
+      slug: 'new-story-without-a-featured-image',
+      featured_media: 0,
+      _embedded: { 'wp:term': post._embedded['wp:term'] },
+    })
+
+    expect(article.image).toEqual(articles[0].image)
+  })
+
   it('keeps listing payloads free of full article bodies', () => {
     const summary = toArticleSummary(transformWordPressPost(post))
 
@@ -105,5 +119,11 @@ describe('WordPress Posts adapter', () => {
     )
 
     expect(html).toBe('<p>Useful text</p><img alt="" loading="lazy" decoding="async" />')
+  })
+
+  it('reserves every static public route from conflicting WordPress post slugs', () => {
+    expect(isSafeWordPressPostSlug('privacy-policy')).toBe(false)
+    expect(isSafeWordPressPostSlug('media')).toBe(false)
+    expect(isSafeWordPressPostSlug('a-valid-field-update')).toBe(true)
   })
 })

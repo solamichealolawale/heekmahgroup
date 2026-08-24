@@ -5,9 +5,11 @@ import type { SiteContent } from '~/types/content'
 const config = useRuntimeConfig()
 const siteUrl = config.public.siteUrl.replace(/\/$/, '')
 const site = await useCmsContent<SiteContent>('site', siteContent)
-const logoUrl = site.value.logo.src.startsWith('/') ? `${siteUrl}${site.value.logo.src}` : site.value.logo.src
+const logoUrl = computed(() =>
+  site.value.logo.src.startsWith('/') ? `${siteUrl}${site.value.logo.src}` : site.value.logo.src,
+)
 
-useJsonLd('heekmah-site-schema', {
+useJsonLd('heekmah-site-schema', () => ({
   '@context': 'https://schema.org',
   '@graph': [
     {
@@ -17,7 +19,7 @@ useJsonLd('heekmah-site-schema', {
       url: `${siteUrl}/`,
       logo: {
         '@type': 'ImageObject',
-        url: logoUrl,
+        url: logoUrl.value,
         width: site.value.logo.width,
         height: site.value.logo.height,
       },
@@ -40,7 +42,7 @@ useJsonLd('heekmah-site-schema', {
       publisher: { '@id': `${siteUrl}/#organization` },
     },
   ],
-})
+}))
 </script>
 
 <template>

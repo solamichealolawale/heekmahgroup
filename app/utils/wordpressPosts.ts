@@ -1,0 +1,324 @@
+import sanitizeHtml from 'sanitize-html'
+
+// Server-side adapter used during prerendering. Browser refreshes use the
+// smaller DOMPurify-based adapter in wordpressPostClient.ts.
+
+import { articles as fallbackArticles } from '~/data/articles'
+import type { ArticleContent, MediaAsset } from '~/types/content'
+import {
+  parseWordPressPageCount,
+  parseWordPressPostArray,
+  type WordPressMedia,
+  type WordPressPost,
+} from '~/utils/wordpressPostValidation'
+
+const allowedTags = [
+  'p',
+  'br',
+  'h2',
+  'h3',
+  'h4',
+  'ul',
+  'ol',
+  'li',
+  'strong',
+  'b',
+  'em',
+  'i',
+  'a',
+  'figure',
+  'img',
+  'figcaption',
+  'blockquote',
+]
+
+function normalizeInternalUrl(url = ''): string {
+  if (!url) return url
+  if (url.startsWith('#')) return url
+
+  try {
+    const parsed = new URL(url, 'https://heekmahgroup.com')
+
+    if (parsed.hostname === 'heekmahgroup.com' || parsed.hostname === 'www.heekmahgroup.com') {
+      const pathname = parsed.pathname === '/heekmah-services/' ? '/heekmah-integral-services/' : parsed.pathname
+      return `${pathname}${parsed.search}${parsed.hash}`
+    }
+  } catch {
+    return url
+  }
+
+  return url
+}
+
+export function sanitizeWordPressContent(content: string): string {
+  return sanitizeHtml(content, {
+    allowedTags,
+    allowedAttributes: {
+      a: ['href', 'target', 'rel'],
+      figure: ['class'],
+      img: ['src', 'srcset', 'sizes', 'alt', 'width', 'height', 'loading', 'decoding'],
+      li: ['value'],
+      ol: ['start'],
+    },
+    allowedClasses: {
+      figure: ['wp-block-image', 'alignwide', 'alignfull', 'size-*'],
+    },
+    allowedSchemes: ['http', 'https', 'mailto', 'tel'],
+    allowedSchemesByTag: {
+      img: ['http', 'https'],
+    },
+    transformTags: {
+      a: (_tagName, attributes) => {
+        const target = attributes.target === '_blank' ? '_blank' : undefined
+        const rel = target ? 'noopener noreferrer' : undefined
+
+        return {
+          tagName: 'a',
+          attribs: {
+            href: normalizeInternalUrl(attributes.href),
+            ...(target ? { target } : {}),
+            ...(rel ? { rel } : {}),
+          },
+        }
+      },
+      img: (_tagName, attributes) => ({
+        tagName: 'img',
+        attribs: {
+          ...(attributes.src ? { src: attributes.src } : {}),
+          ...(attributes.srcset ? { srcset: attributes.srcset } : {}),
+          ...(attributes.sizes ? { sizes: attributes.sizes } : {}),
+          alt: attributes.alt ?? '',
+          ...(attributes.width ? { width: attributes.width } : {}),
+          ...(attributes.height ? { height: attributes.height } : {}),
+          loading: 'lazy',
+          decoding: 'async',
+        },
+      }),
+    },
+  })
+}
+
+function decodeHtmlEntities(value: string): string {
+  const namedEntities: Readonly<Record<string, string>> = {
+    amp: '&',
+    apos: "'",
+    gt: '>',
+    lt: '<',
+    nbsp: ' ',
+    quot: '"',
+  }
+
+  return value
+    .replace(/&#(\d+);/g, (_match, code: string) => String.fromCodePoint(Number(code)))
+    .replace(/&#x([\da-f]+);/gi, (_match, code: string) => String.fromCodePoint(Number.parseInt(code, 16)))
+    .replace(/&([a-z]+);/gi, (match, name: string) => namedEntities[name.toLowerCase()] ?? match)
+}
+
+function plainText(html: string): string {
+  return decodeHtmlEntities(sanitizeHtml(html, { allowedTags: [], allowedAttributes: {} }))
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function truncate(value: string, maximumLength: number): string {
+  if (value.length <= maximumLength) return value
+
+  const shortened = value
+    .slice(0, maximumLength + 1)
+    .replace(/\s+\S*$/, '')
+    .trimEnd()
+  return `${shortened}…`
+}
+
+function formatDate(value: string): string {
+  const [year, month, day] = value.slice(0, 10).split('-').map(Number)
+  const date = new Date(Date.UTC(year ?? 1970, (month ?? 1) - 1, day ?? 1))
+
+  return new Intl.DateTimeFormat('en-NG', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(date)
+}
+
+function mediaSrcSet(media: WordPressMedia): string | undefined {
+  const sizes = Object.values(media.media_details?.sizes ?? {})
+  const candidates = [
+    ...sizes.map((size) => ({ src: size.source_url, width: size.width })),
+    {
+      src: media.source_url,
+      width: media.media_details?.width,
+    },
+  ]
+  const uniqueCandidates = new Map<number, string>()
+
+  for (const candidate of candidates) {
+    if (candidate.width && candidate.src) uniqueCandidates.set(candidate.width, candidate.src)
+  }
+
+  const entries = [...uniqueCandidates.entries()].sort(([firstWidth], [secondWidth]) => firstWidth - secondWidth)
+  return entries.length > 1 ? entries.map(([width, src]) => `${src} ${width}w`).join(', ') : undefined
+}
+
+function featuredImage(post: WordPressPost, fallback?: ArticleContent): MediaAsset {
+  const media = post._embedded?.['wp:featuredmedia']?.[0]
+
+  if (media) {
+    return {
+      src: media.source_url,
+      alt: media.alt_text?.trim() || plainText(post.title.rendered),
+      width: media.media_details?.width ?? fallback?.image.width ?? 1600,
+      height: media.media_details?.height ?? fallback?.image.height ?? 900,
+      attachmentId: post.featured_media || undefined,
+      srcSet: mediaSrcSet(media),
+    }
+  }
+
+  if (fallback) return fallback.image
+
+  return fallbackArticles[0].image
+}
+
+function postCategory(post: WordPressPost): string {
+  const terms = post._embedded?.['wp:term']?.flat() ?? []
+  return terms.find((term) => term.taxonomy === 'category')?.name || 'News'
+}
+
+export function transformWordPressPost(post: WordPressPost): ArticleContent {
+  const fallback = fallbackArticles.find((article) => article.slug === post.slug)
+  const title = plainText(post.title.rendered)
+  const excerpt = plainText(post.excerpt.rendered) || plainText(post.content.rendered)
+  const description = truncate(excerpt, 158)
+  const category = postCategory(post)
+
+  return {
+    slug: post.slug,
+    seo: {
+      title: `${title} | Heekmah Group`,
+      description,
+    },
+    eyebrow: category,
+    title,
+    summary: truncate(excerpt, 240),
+    date: formatDate(post.date),
+    datePublished: post.date.slice(0, 10),
+    dateModified: post.modified.slice(0, 10),
+    category,
+    image: featuredImage(post, fallback),
+    blocks: fallback?.blocks ?? [],
+    html: sanitizeWordPressContent(post.content.rendered),
+    source: 'wordpress',
+  }
+}
+
+async function fetchWordPressPostPage(wordpressUrl: string, page: number) {
+  const response = await $fetch.raw<unknown>(`${wordpressUrl}/wp-json/wp/v2/posts`, {
+    query: {
+      page,
+      per_page: 100,
+      status: 'publish',
+      order: 'desc',
+      orderby: 'date',
+      heekmah_refresh: Date.now(),
+      _embed: 'wp:featuredmedia,wp:term',
+      _fields: 'id,slug,date,modified,title,excerpt,content,featured_media,categories,_links,_embedded',
+    },
+    timeout: 12_000,
+    retry: 1,
+  })
+
+  return {
+    headers: response.headers,
+    posts: parseWordPressPostArray(response._data, true),
+  }
+}
+
+async function fetchWordPressPostBySlug(wordpressUrl: string, slug: string): Promise<ArticleContent | undefined> {
+  const response = await $fetch.raw<unknown>(`${wordpressUrl}/wp-json/wp/v2/posts`, {
+    query: {
+      slug,
+      per_page: 1,
+      status: 'publish',
+      heekmah_refresh: Date.now(),
+      _embed: 'wp:featuredmedia,wp:term',
+      _fields: 'id,slug,date,modified,title,excerpt,content,featured_media,categories,_links,_embedded',
+    },
+    timeout: 12_000,
+    retry: 1,
+  })
+
+  const post = parseWordPressPostArray(response._data, true)[0]
+  return post ? transformWordPressPost(post) : undefined
+}
+
+interface ArticleCacheEntry {
+  readonly expiresAt: number
+  readonly request: Promise<readonly ArticleContent[]>
+}
+
+const articleCache = new Map<string, ArticleCacheEntry>()
+
+async function fetchAndTransformWordPressArticles(
+  wordpressUrl: string,
+  useFallbackOnError: boolean,
+): Promise<readonly ArticleContent[]> {
+  try {
+    const firstPage = await fetchWordPressPostPage(wordpressUrl, 1)
+    const pageCount = parseWordPressPageCount(firstPage.headers.get('x-wp-totalpages'))
+    const posts = [...firstPage.posts]
+
+    for (let page = 2; page <= pageCount; page += 1) {
+      const response = await fetchWordPressPostPage(wordpressUrl, page)
+      posts.push(...response.posts)
+    }
+
+    return posts.length || !useFallbackOnError ? posts.map(transformWordPressPost) : fallbackArticles
+  } catch (error) {
+    if (!useFallbackOnError) throw error
+
+    console.warn('[Heekmah CMS] Using bundled articles because the WordPress Posts API could not be reached.', error)
+    return fallbackArticles
+  }
+}
+
+export async function getWordPressArticles(
+  wordpressUrl: string,
+  cmsEnabled: boolean,
+  useFallbackOnError = true,
+): Promise<readonly ArticleContent[]> {
+  if (!cmsEnabled) return fallbackArticles
+
+  const normalizedUrl = wordpressUrl.replace(/\/$/, '')
+  const cacheKey = `${normalizedUrl}:${useFallbackOnError ? 'fallback' : 'strict'}`
+  const cached = articleCache.get(cacheKey)
+
+  if (cached && cached.expiresAt > Date.now()) return await cached.request
+
+  const request = fetchAndTransformWordPressArticles(normalizedUrl, useFallbackOnError)
+  articleCache.set(cacheKey, {
+    expiresAt: Date.now() + 30_000,
+    request,
+  })
+
+  return await request
+}
+
+interface ArticleDetailCacheEntry {
+  readonly expiresAt: number
+  readonly request: Promise<ArticleContent | undefined>
+}
+
+const articleDetailCache = new Map<string, ArticleDetailCacheEntry>()
+
+export async function getWordPressArticle(wordpressUrl: string, slug: string): Promise<ArticleContent | undefined> {
+  const normalizedUrl = wordpressUrl.replace(/\/$/, '')
+  const cacheKey = `${normalizedUrl}:${slug}`
+  const cached = articleDetailCache.get(cacheKey)
+
+  if (cached && cached.expiresAt > Date.now()) return await cached.request
+
+  const request = fetchWordPressPostBySlug(normalizedUrl, slug)
+  articleDetailCache.set(cacheKey, { expiresAt: Date.now() + 30_000, request })
+  return await request
+}

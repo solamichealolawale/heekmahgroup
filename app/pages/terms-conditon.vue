@@ -4,10 +4,10 @@ import type { LegalPageContent } from '~/types/content'
 
 const content = await useCmsContent<LegalPageContent>('terms', termsPageContent)
 
-usePageSeo({
+usePageSeo(() => ({
   ...content.value.seo,
   path: '/terms-conditon/',
-})
+}))
 </script>
 
 <template>

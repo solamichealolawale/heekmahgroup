@@ -6,12 +6,12 @@ import type { ContactPageContent, SiteContent } from '~/types/content'
 const content = await useCmsContent<ContactPageContent>('contact', contactPageContent)
 const site = await useCmsContent<SiteContent>('site', siteContent)
 
-usePageSeo({
+usePageSeo(() => ({
   ...content.value.seo,
   path: '/contact-us/',
   schemaName: content.value.hero.title,
   schemaType: 'ContactPage',
-})
+}))
 </script>
 
 <template>
@@ -111,7 +111,6 @@ usePageSeo({
   min-height: 54px;
   display: flex;
   padding: 10px 0;
-  border-top: 1px solid var(--line);
   align-items: flex-start;
   flex-direction: column;
   justify-content: center;
@@ -123,6 +122,10 @@ usePageSeo({
   transition-property: color;
   transition-duration: 150ms;
   transition-timing-function: var(--ease-out);
+}
+
+.direct-contact a + a {
+  border-top: 1px solid var(--line);
 }
 
 .direct-contact a span {
@@ -171,12 +174,11 @@ usePageSeo({
 
 .location-list address {
   padding: 24px 0;
-  border-top: 1px solid var(--line);
   font-style: normal;
 }
 
-.location-list address:last-child {
-  border-bottom: 1px solid var(--line);
+.location-list address + address {
+  border-top: 1px solid var(--line);
 }
 
 .location-list p {
@@ -211,9 +213,10 @@ usePageSeo({
     gap: 24px;
   }
 
-  .location-list address,
-  .location-list address:last-child {
-    border-bottom: 1px solid var(--line);
+  .location-list address + address {
+    padding-left: 24px;
+    border-top: 0;
+    border-left: 1px solid var(--line);
   }
 }
 
@@ -229,6 +232,12 @@ usePageSeo({
   .location-list {
     grid-template-columns: 1fr;
     gap: 0;
+  }
+
+  .location-list address + address {
+    padding-left: 0;
+    border-top: 1px solid var(--line);
+    border-left: 0;
   }
 }
 </style>

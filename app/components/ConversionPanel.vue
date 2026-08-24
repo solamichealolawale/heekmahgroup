@@ -72,8 +72,6 @@ defineProps<{
 
 .conversion-list {
   display: grid;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
@@ -81,12 +79,11 @@ defineProps<{
   min-height: 300px;
   display: flex;
   padding: 30px clamp(22px, 2.6vw, 36px) 32px;
-  border-left: 1px solid rgba(255, 255, 255, 0.2);
   flex-direction: column;
 }
 
-.conversion-item:last-child {
-  border-right: 1px solid rgba(255, 255, 255, 0.2);
+.conversion-item + .conversion-item {
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .conversion-eyebrow {
@@ -171,12 +168,12 @@ defineProps<{
 
   .conversion-item {
     min-height: 250px;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-    border-right: 1px solid rgba(255, 255, 255, 0.2);
+    border-left: 0;
   }
 
-  .conversion-item:first-child {
-    border-top: 0;
+  .conversion-item + .conversion-item {
+    border-left: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
   }
 }
 </style>

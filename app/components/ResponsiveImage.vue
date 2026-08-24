@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+
 import type { MediaAsset } from '~/types/content'
 import wordpressMedia from '~/data/wordpress-media.json'
 
@@ -9,6 +11,8 @@ const props = withDefaults(
     loading?: 'eager' | 'lazy'
     fetchPriority?: 'auto' | 'high' | 'low'
     preload?: boolean
+    nuxtSizes?: string
+    maxWidth?: number
   }>(),
   {
     loading: 'lazy',
@@ -19,7 +23,23 @@ const props = withDefaults(
 
 const isLocalAsset = computed(() => props.asset.src.startsWith('/'))
 const fallbackMedia = wordpressMedia as Record<string, { readonly attachmentId: number; readonly srcSet: string }>
-const responsiveSrcSet = computed(() => props.asset.srcSet || fallbackMedia[props.asset.src]?.srcSet)
+const responsiveSrcSet = computed(() => {
+  const srcSet = props.asset.srcSet || fallbackMedia[props.asset.src]?.srcSet
+  const maxWidth = props.maxWidth
+
+  if (!srcSet || !maxWidth) return srcSet
+
+  const candidates = srcSet
+    .split(',')
+    .map((candidate) => candidate.trim())
+    .filter((candidate) => {
+      const width = candidate.match(/\s(\d+)w$/)?.[1]
+
+      return !width || Number(width) <= maxWidth
+    })
+
+  return candidates.length ? candidates.join(', ') : srcSet
+})
 </script>
 
 <template>
@@ -32,6 +52,19 @@ const responsiveSrcSet = computed(() => props.asset.srcSet || fallbackMedia[prop
     :loading="loading"
     :fetchpriority="fetchPriority"
     :preload="preload ? { fetchPriority } : false"
+    decoding="async"
+  />
+  <NuxtImg
+    v-else-if="nuxtSizes"
+    provider="none"
+    :src="asset.src"
+    :srcset="responsiveSrcSet || undefined"
+    :sizes="nuxtSizes"
+    :alt="asset.alt"
+    :width="asset.width"
+    :height="asset.height"
+    :loading="loading"
+    :fetchpriority="fetchPriority"
     decoding="async"
   />
   <img

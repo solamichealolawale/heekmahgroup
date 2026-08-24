@@ -4,10 +4,10 @@ import type { LegalPageContent } from '~/types/content'
 
 const content = await useCmsContent<LegalPageContent>('refunds', refundPageContent)
 
-usePageSeo({
+usePageSeo(() => ({
   ...content.value.seo,
   path: '/refund_returns/',
-})
+}))
 </script>
 
 <template>

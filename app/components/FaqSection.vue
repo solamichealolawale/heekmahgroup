@@ -41,13 +41,12 @@ defineProps<{
   gap: clamp(56px, 10vw, 150px);
 }
 
-.faq-list {
-  border-top: 1px solid var(--line);
-}
-
 details {
   padding: 0;
-  border-bottom: 1px solid var(--line);
+}
+
+details + details {
+  border-top: 1px solid var(--line);
 }
 
 summary {

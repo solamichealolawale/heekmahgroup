@@ -1,14 +1,20 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+const cmsEnabled = process.env.NUXT_CMS_ENABLED === 'true'
+const cmsStrict = process.env.NUXT_CMS_STRICT === 'true'
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   modules: ['@nuxt/image'],
   image: {
     format: ['webp'],
     quality: 82,
+    none: {},
   },
   runtimeConfig: {
-    cmsEnabled: process.env.NUXT_CMS_ENABLED === 'true',
+    cmsEnabled,
+    cmsStrict,
     public: {
+      cmsEnabled,
       siteUrl: 'https://heekmahgroup.com',
       wordpressUrl: 'https://heekmahgroup.com',
     },
@@ -25,6 +31,7 @@ export default defineNuxtConfig({
     },
     '/blog/': { prerender: true },
     '/contact-us/': { prerender: true },
+    '/privacy-policy/': { prerender: true },
     '/terms-conditon/': { prerender: true },
     '/refund_returns/': { prerender: true },
   },
@@ -38,8 +45,10 @@ export default defineNuxtConfig({
         '/heekmah-integral-services/',
         '/blog/',
         '/contact-us/',
+        '/privacy-policy/',
         '/terms-conditon/',
         '/refund_returns/',
+        '/_heekmah/article-routes.json',
         '/sitemap.xml',
       ],
     },
@@ -54,7 +63,7 @@ export default defineNuxtConfig({
       script: [
         {
           innerHTML:
-            "(()=>{try{const stored=localStorage.getItem('heekmah-theme');const theme=stored==='light'||stored==='dark'?stored:matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=theme;document.querySelector('meta[name=\"theme-color\"]')?.setAttribute('content',theme==='dark'?'#101411':'#fbf9f3')}catch{}})()",
+            "(()=>{try{const stored=localStorage.getItem('heekmah-theme');const mode=stored==='light'||stored==='dark'||stored==='system'?stored:'system';const theme=mode==='system'?(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):mode;document.documentElement.dataset.themeMode=mode;document.documentElement.dataset.theme=theme;document.querySelector('meta[name=\"theme-color\"]')?.setAttribute('content',theme==='dark'?'#101411':'#fbf9f3')}catch{}})()",
         },
       ],
       link: [

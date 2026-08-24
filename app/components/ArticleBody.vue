@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import type { ArticleContent } from '~/types/content'
+import type { ArticleContent, BlogPageContent } from '~/types/content'
 
 defineProps<{
   article: ArticleContent
+  conversion: BlogPageContent['articleConversion']
 }>()
 </script>
 
@@ -29,7 +30,7 @@ defineProps<{
     </figure>
 
     <div class="shell article-layout">
-      <!-- WordPress HTML is sanitized on the Nitro server before it reaches this component. -->
+      <!-- WordPress HTML is sanitized during generation and again when the browser refreshes it. -->
       <div v-if="article.html" class="article-body wordpress-article-content" v-html="article.html" />
 
       <div v-else class="article-body">
@@ -47,16 +48,16 @@ defineProps<{
       </div>
 
       <aside class="article-conversion">
-        <p class="eyebrow">Continue the conversation</p>
-        <h2>Have a related project or partnership in mind?</h2>
-        <p>Tell us what you are working on and where Heekmah Group may be able to contribute.</p>
+        <p class="eyebrow">{{ conversion.eyebrow }}</p>
+        <h2>{{ conversion.title }}</h2>
+        <p>{{ conversion.body }}</p>
         <NuxtLink
           class="button-link"
-          to="/contact-us/?interest=partnership"
+          :to="conversion.action.to"
           data-cta-location="article-sidebar"
           data-cta-intent="partnership"
         >
-          Talk to our team
+          {{ conversion.action.label }}
         </NuxtLink>
       </aside>
     </div>

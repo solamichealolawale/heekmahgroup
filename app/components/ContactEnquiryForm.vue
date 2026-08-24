@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ContactPageContent } from '~/types/content'
 import { normalizeEnquiryInterest } from '~/utils/enquiryInterest'
+import { enquirySubmissionErrorMessage } from '~/utils/enquirySubmission'
 
 interface EnquiryFormData {
   name: string
@@ -85,6 +86,8 @@ async function submitEnquiry(): Promise<void> {
   try {
     const response = await $fetch<EnquiryResponse>(endpoint.value, {
       method: 'POST',
+      timeout: 15_000,
+      retry: 0,
       body: {
         ...form.value,
         source: route.fullPath,
@@ -99,10 +102,9 @@ async function submitEnquiry(): Promise<void> {
     form.value = createEmptyForm(submittedInterest)
     submissionState.value = 'success'
     statusMessage.value = response.message || 'Thank you. Your enquiry has been received.'
-  } catch {
+  } catch (error) {
     submissionState.value = 'error'
-    statusMessage.value =
-      'The online enquiry service is unavailable right now. Please email info@heekmahgroup.com or call +234 905 555 4302.'
+    statusMessage.value = enquirySubmissionErrorMessage(error)
   }
 }
 

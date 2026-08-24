@@ -1,3 +1,5 @@
+import { computed, toValue, type MaybeRefOrGetter } from 'vue'
+
 import type { MediaAsset } from '~/types/content'
 
 interface PageSeoInput {
@@ -12,72 +14,82 @@ interface PageSeoInput {
   readonly dateModified?: string
 }
 
-export function usePageSeo(input: PageSeoInput): void {
+export function usePageSeo(input: MaybeRefOrGetter<PageSeoInput>): void {
   const config = useRuntimeConfig()
   const siteUrl = config.public.siteUrl.replace(/\/$/, '')
-  const canonicalUrl = `${siteUrl}${input.path}`
-  const imageUrl = input.image?.src.startsWith('/') ? `${siteUrl}${input.image.src}` : input.image?.src
+  const resolvedInput = computed(() => toValue(input))
+  const canonicalUrl = computed(() => `${siteUrl}${resolvedInput.value.path}`)
+  const imageUrl = computed(() => {
+    const image = resolvedInput.value.image
+    return image?.src.startsWith('/') ? `${siteUrl}${image.src}` : image?.src
+  })
 
   useSeoMeta({
-    title: input.title,
-    description: input.description,
+    title: () => resolvedInput.value.title,
+    description: () => resolvedInput.value.description,
     robots: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
-    ogTitle: input.title,
-    ogDescription: input.description,
-    ogUrl: canonicalUrl,
+    ogTitle: () => resolvedInput.value.title,
+    ogDescription: () => resolvedInput.value.description,
+    ogUrl: () => canonicalUrl.value,
     ogSiteName: 'Heekmah Group',
     ogLocale: 'en_NG',
-    ogImage: imageUrl,
-    ogImageAlt: input.image?.alt,
-    ogImageWidth: input.image?.width,
-    ogImageHeight: input.image?.height,
-    ogType: input.type ?? 'website',
-    articlePublishedTime: input.datePublished,
-    articleModifiedTime: input.dateModified,
-    twitterCard: imageUrl ? 'summary_large_image' : 'summary',
-    twitterTitle: input.title,
-    twitterDescription: input.description,
-    twitterImage: imageUrl,
-    twitterImageAlt: input.image?.alt,
+    ogImage: () => imageUrl.value,
+    ogImageAlt: () => resolvedInput.value.image?.alt,
+    ogImageWidth: () => resolvedInput.value.image?.width,
+    ogImageHeight: () => resolvedInput.value.image?.height,
+    ogType: () => resolvedInput.value.type ?? 'website',
+    articlePublishedTime: () => resolvedInput.value.datePublished,
+    articleModifiedTime: () => resolvedInput.value.dateModified,
+    twitterCard: () => (imageUrl.value ? 'summary_large_image' : 'summary'),
+    twitterTitle: () => resolvedInput.value.title,
+    twitterDescription: () => resolvedInput.value.description,
+    twitterImage: () => imageUrl.value,
+    twitterImageAlt: () => resolvedInput.value.image?.alt,
   })
 
-  useHead({
-    link: [{ rel: 'canonical', href: canonicalUrl }],
-  })
+  useHead(() => ({
+    link: [{ rel: 'canonical', href: canonicalUrl.value }],
+  }))
 
-  const webpageId = `${canonicalUrl}#webpage`
-  const schemaType = input.schemaType ?? (input.type === 'article' ? 'BlogPosting' : 'WebPage')
-  const schema: Record<string, unknown> = {
-    '@context': 'https://schema.org',
-    '@type': schemaType,
-    '@id': webpageId,
-    url: canonicalUrl,
-    name: input.schemaName ?? input.title,
-    description: input.description,
-    inLanguage: 'en-NG',
-    isPartOf: { '@id': `${siteUrl}/#website` },
-    about: { '@id': `${siteUrl}/#organization` },
-  }
-
-  if (imageUrl) {
-    schema.primaryImageOfPage = {
-      '@type': 'ImageObject',
-      url: imageUrl,
-      width: input.image?.width,
-      height: input.image?.height,
-      caption: input.image?.alt,
+  const schema = computed<Record<string, unknown>>(() => {
+    const pageInput = resolvedInput.value
+    const pageImageUrl = imageUrl.value
+    const webpageId = `${canonicalUrl.value}#webpage`
+    const schemaType = pageInput.schemaType ?? (pageInput.type === 'article' ? 'BlogPosting' : 'WebPage')
+    const value: Record<string, unknown> = {
+      '@context': 'https://schema.org',
+      '@type': schemaType,
+      '@id': webpageId,
+      url: canonicalUrl.value,
+      name: pageInput.schemaName ?? pageInput.title,
+      description: pageInput.description,
+      inLanguage: 'en-NG',
+      isPartOf: { '@id': `${siteUrl}/#website` },
+      about: { '@id': `${siteUrl}/#organization` },
     }
-    schema.image = imageUrl
-  }
 
-  if (schemaType === 'BlogPosting') {
-    schema.headline = input.schemaName ?? input.title
-    schema.mainEntityOfPage = { '@id': webpageId }
-    schema.datePublished = input.datePublished
-    schema.dateModified = input.dateModified ?? input.datePublished
-    schema.author = { '@id': `${siteUrl}/#organization` }
-    schema.publisher = { '@id': `${siteUrl}/#organization` }
-  }
+    if (pageImageUrl) {
+      value.primaryImageOfPage = {
+        '@type': 'ImageObject',
+        url: pageImageUrl,
+        width: pageInput.image?.width,
+        height: pageInput.image?.height,
+        caption: pageInput.image?.alt,
+      }
+      value.image = pageImageUrl
+    }
+
+    if (schemaType === 'BlogPosting') {
+      value.headline = pageInput.schemaName ?? pageInput.title
+      value.mainEntityOfPage = { '@id': webpageId }
+      value.datePublished = pageInput.datePublished
+      value.dateModified = pageInput.dateModified ?? pageInput.datePublished
+      value.author = { '@id': `${siteUrl}/#organization` }
+      value.publisher = { '@id': `${siteUrl}/#organization` }
+    }
+
+    return value
+  })
 
   useJsonLd('heekmah-page-schema', schema)
 }

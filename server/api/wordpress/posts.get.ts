@@ -4,7 +4,7 @@ import { toArticleSummary } from '~/utils/articles'
 export default defineCachedEventHandler(
   async (event) => {
     const config = useRuntimeConfig(event)
-    const articles = await getWordPressArticles(config.public.wordpressUrl, config.cmsEnabled)
+    const articles = await getWordPressArticles(config.public.wordpressUrl, config.cmsEnabled, !config.cmsStrict)
     return articles.map(toArticleSummary)
   },
   {

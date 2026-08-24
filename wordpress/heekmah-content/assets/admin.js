@@ -27,10 +27,10 @@
 
   function clearClone(clone) {
     clone.querySelectorAll('input, textarea, select').forEach((field) => {
-      if (field.dataset.preserve === 'true') return
-
       if (field.name.endsWith('[id]')) {
-        field.value = `section-${Date.now()}`
+        field.value = `section-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
+      } else if (field.dataset.preserve === 'true') {
+        return
       } else if (field.type === 'checkbox' || field.type === 'radio') {
         field.checked = false
       } else if (

@@ -7,6 +7,7 @@ import { homePageContent } from '../app/data/home'
 import {
   aboutPageContent,
   blogPageContent,
+  privacyPageContent,
   refundPageContent,
   ricePageContent,
   servicesPageContent,
@@ -24,6 +25,7 @@ const content = {
   rice: ricePageContent,
   services: servicesPageContent,
   blog: blogPageContent,
+  privacy: privacyPageContent,
   terms: termsPageContent,
   refunds: refundPageContent,
 }

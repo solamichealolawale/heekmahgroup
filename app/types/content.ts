@@ -7,6 +7,11 @@ export interface MediaAsset {
   readonly srcSet?: string
 }
 
+export interface HeroSlide extends MediaAsset {
+  readonly title: string
+  readonly description: string
+}
+
 export interface ContentLink {
   readonly label: string
   readonly to: string
@@ -73,9 +78,7 @@ export interface HeroContent {
   readonly primaryAction: ContentLink
   readonly secondaryAction: ContentLink
   readonly highlights: readonly string[]
-  readonly primaryImage: MediaAsset
-  readonly secondaryImage: MediaAsset
-  readonly imageCaption: string
+  readonly slides: readonly HeroSlide[]
 }
 
 export interface StoryContent {
@@ -203,7 +206,6 @@ export interface HomePageContent {
   readonly testimonials: TestimonialsContent
   readonly faqs: FaqContent
   readonly articles: NewsContent
-  readonly partnership: PartnershipContent
 }
 
 export interface PageHeroContent {
@@ -354,4 +356,11 @@ export interface BlogPageContent {
   }
   readonly hero: PageHeroContent
   readonly news: NewsHeaderContent
+  readonly callout: CalloutSectionContent
+  readonly articleConversion: {
+    readonly eyebrow: string
+    readonly title: string
+    readonly body: string
+    readonly action: ContentLink
+  }
 }

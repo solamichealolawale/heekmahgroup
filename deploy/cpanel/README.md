@@ -11,7 +11,7 @@ public_html/
 ├── wp-content/                # existing WordPress and media
 ├── nuxt-app/
 │   ├── current/               # active Nuxt static release
-│   └── previous/              # rollback copy
+│   └── previous-<release-id>/ # uniquely named rollback copies
 └── .htaccess                  # path split in live.htaccess
 ```
 
@@ -37,13 +37,15 @@ Creating the subdomain, changing DNS, installing plugins and changing live routi
 4. Confirm `https://heekmahgroup.com/wp-json/wp/v2/posts?status=publish` returns the native published posts. Assign a Featured Image to each post so listing and article covers use WordPress-generated responsive candidates; the existing three posts currently use reviewed fallback covers because no Featured Image is assigned.
 5. Confirm a media object in the structured response includes `attachmentId` and `srcSet`. This is the responsive-image contract used by the static frontend.
 6. Upload and activate `heekmah-enquiries.zip` when email delivery is ready to test.
-7. Generate production with `NUXT_CMS_ENABLED=true`. The build fetches every published post, discovers each article route and writes those URLs into the Nuxt sitemap. If WordPress is unavailable during a build, Nuxt logs the failure and uses the bundled reviewed content.
+7. Generate production through `pnpm release:cpanel`. The release command enables strict CMS mode, validates all ten structured collections and every published post, then discovers each article route and writes those URLs into the Nuxt sitemap. If WordPress is unavailable, stale or malformed, packaging stops instead of shipping bundled fallback content.
+
+The deployed browser app also refreshes existing page collections and published posts directly from WordPress after hydration. Plugin 1.4.0 gives anonymous native Post reads a 30-second public cache window, and the browser uses the same bounded refresh key, so visitors can share short-lived responses instead of sending a unique cache-busting request each time. A rebuild is still required when publishing a new post URL and whenever updated HTML, metadata or sitemap content must be available to crawlers before JavaScript runs. Newly published posts are deliberately withheld from public listings until their generated route is deployed, so editors never create a visible broken link. Unpublishing or deleting a post is not complete until a new release is deployed: the browser refresh will show a 404, but the old prerendered HTML and sitemap entry remain publicly reachable to no-JavaScript clients and crawlers until that release replaces them.
 
 ## Live cutover
 
 1. Download a full cPanel backup and save the existing `public_html/.htaccess` separately.
-2. Upload and extract the new release as `public_html/nuxt-app/next`.
-3. Rename the existing `current` directory to `previous`, then rename `next` to `current`. On the first release, create `current` directly.
+2. Upload and extract the new release as `public_html/nuxt-app/next-<release-id>`.
+3. If `current` exists, rename it to `previous-<release-id>`, then rename `next-<release-id>` to `current`. Unique names prevent later cutovers from colliding with an older rollback copy. On the first release, rename the uploaded directory directly to `current`.
 4. Upload `live.htaccess` as `public_html/.htaccess` only after checking its contents against any hosting-specific rules in the existing file. Preserve host-managed PHP and SSL directives outside the rewrite block.
 5. Test `/`, every navigation route, one article, `/wp-admin/`, the structured-content REST endpoint, an upload URL, a deliberate 404, canonical tags and the enquiry form.
 6. Confirm `http://heekmahgroup.com` reaches HTTPS, `www.heekmahgroup.com` redirects to the non-`www` host, extensionless route variants gain a trailing slash, and `/heekmah-services/` redirects to `/heekmah-integral-services/`.
@@ -53,18 +55,18 @@ Creating the subdomain, changing DNS, installing plugins and changing live routi
 ## Rollback
 
 1. Restore the saved `.htaccess` to return all public routes to WordPress; or
-2. Rename `current` to `failed`, rename `previous` to `current`, and leave the Nuxt routing file in place.
+2. Rename `current` to `failed-<release-id>`, rename the chosen `previous-<release-id>` to `current`, and leave the Nuxt routing file in place. Always use a new failure name so rollback never overwrites an older release.
 
 Neither rollback deletes a release. Keep the last known-good directory until the new version has been stable and verified.
 
 ## Ongoing publishing
 
-WordPress saves update the structured REST content immediately, but the public Nuxt HTML changes only after a new static build. The manual starting point is:
+WordPress saves update browser-rendered content without a rebuild; allow up to 30 seconds for the shared freshness window, then refresh the page. Prerendered source HTML, crawler/social metadata, sitemap entries and new post routes change only after a new static build. The manual starting point is:
 
 ```bash
-NUXT_CMS_ENABLED=true pnpm release:cpanel
+pnpm release:cpanel
 ```
 
-The generated ZIP in `artifacts/cpanel` can be uploaded as `next`. A protected deployment webhook can automate this later, but it should use the same build, upload, verify and directory-swap sequence.
+The generated ZIP in `artifacts/cpanel` can be uploaded as `next-<release-id>`. A protected deployment webhook can automate this later, but it should use the same build, upload, verify and directory-swap sequence.
 
 WordPress or plugin-generated SEO tags are harmless while they remain inside the unused WordPress theme response, but they must not be copied into the Nuxt head. Nuxt owns the public metadata and sitemap; WordPress owns the editable SEO content fields.

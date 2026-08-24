@@ -22,23 +22,52 @@ export const homePageContent = {
       to: '#companies',
     },
     highlights: ['Rice production', 'Farm inputs', 'Mechanisation'],
-    primaryImage: {
-      src: `${mediaBase}/2024/12/IMG_4685-scaled.webp`,
-      alt: 'Heekmah agricultural operations in Nigeria',
-      width: 1512,
-      height: 1123,
-    },
-    secondaryImage: {
-      src: `${mediaBase}/2025/01/PHOTO-2025-01-07-09-38-32-1-410x300.webp`,
-      alt: 'A close view of Heekmah agricultural work',
-      width: 410,
-      height: 300,
-    },
-    imageCaption: 'From field to table',
+    slides: [
+      {
+        src: `${mediaBase}/2024/12/pexels-agro-oliveira-289675200-13157324-1-scaled.webp`,
+        alt: 'Green agricultural machinery lined up inside a manufacturing facility',
+        title: 'Farm mechanisation',
+        description:
+          'From premium rice production to eco-friendly farm inputs, Heekmah Group is your trusted partner in driving food security and agricultural excellence.',
+        width: 2560,
+        height: 1620,
+        attachmentId: 8739,
+      },
+      {
+        src: `${mediaBase}/2025/01/heekah.webp`,
+        alt: 'Stacked bags of Heekmah Rice ready for distribution',
+        title: 'Heekmah Rice, ready for distribution',
+        description:
+          'Our state-of-the-art processing ensures clean, stone-free, long-grain rice for your home or business. Available in 50kg, 25kg, and 10kg packages.',
+        width: 2560,
+        height: 1620,
+        attachmentId: 8886,
+      },
+      {
+        src: `${mediaBase}/2025/01/outgrowers.webp`,
+        alt: 'Heekmah team reviewing seedlings inside a greenhouse',
+        title: 'Supporting our out-growers',
+        description:
+          'We support farmers with seeds, fertilizers, mechanization, and market access, ensuring improved yields and better livelihoods.',
+        width: 2560,
+        height: 1620,
+        attachmentId: 8882,
+      },
+      {
+        src: `${mediaBase}/2025/01/chemical.webp`,
+        alt: 'Crop protection work in a rice field',
+        title: 'Crop protection in practice',
+        description:
+          'We support farmers with seeds, fertilizers, mechanization, and market access, ensuring improved yields and better livelihoods.',
+        width: 2560,
+        height: 1620,
+        attachmentId: 8892,
+      },
+    ],
   },
   conversion: {
-    eyebrow: 'Start here',
-    title: 'How can we help?',
+    eyebrow: 'Next steps',
+    title: 'Talk to the right team',
     items: [
       {
         eyebrow: 'Buy and stock',
@@ -103,10 +132,10 @@ export const homePageContent = {
           to: '/heekmah-rice/',
         },
         image: {
-          src: `${mediaBase}/2025/01/HEEKEEM-2.webp`,
-          alt: 'Packaged Heekmah rice products',
-          width: 1512,
-          height: 857,
+          src: `${mediaBase}/2024/12/IMG_4683-scaled.webp`,
+          alt: 'Stacked bags of Heekmah Rice ready for distribution',
+          width: 2560,
+          height: 1909,
         },
       },
       {
@@ -331,24 +360,5 @@ export const homePageContent = {
         },
       },
     ],
-  },
-  partnership: {
-    eyebrow: 'Work with Heekmah',
-    title: 'Shape the future of agriculture with us',
-    body: 'Become a distributor, supplier or partner and help strengthen innovation and excellence across Nigeria’s agricultural sector.',
-    action: {
-      label: 'Start a conversation',
-      to: '/contact-us/?interest=partnership',
-    },
-    secondaryAction: {
-      label: 'Call our team',
-      to: 'tel:+2349055554302',
-    },
-    image: {
-      src: `${mediaBase}/2025/01/DRB_6375-2-2048x1402.webp`,
-      alt: 'Heekmah Group working with agricultural partners',
-      width: 2048,
-      height: 1402,
-    },
   },
 } as const satisfies HomePageContent

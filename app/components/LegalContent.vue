@@ -17,8 +17,8 @@ defineProps<{
     </header>
 
     <div class="shell legal-layout">
-      <aside class="legal-notice" aria-label="Review status">
-        <p>Review before launch</p>
+      <aside class="legal-notice" aria-label="Important information">
+        <p>Important information</p>
         <span>{{ content.reviewNotice }}</span>
       </aside>
 
@@ -105,6 +105,10 @@ defineProps<{
   padding-bottom: 40px;
   margin-bottom: 40px;
   border-bottom: 1px solid var(--line);
+}
+
+.legal-body section:last-of-type {
+  border-bottom: 0;
 }
 
 .legal-body h2 {

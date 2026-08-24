@@ -4,7 +4,7 @@ export default defineCachedEventHandler(
   async (event) => {
     const config = useRuntimeConfig(event)
     const slug = getRouterParam(event, 'slug')
-    const articles = await getWordPressArticles(config.public.wordpressUrl, config.cmsEnabled)
+    const articles = await getWordPressArticles(config.public.wordpressUrl, config.cmsEnabled, !config.cmsStrict)
     const article = articles.find((item) => item.slug === slug)
 
     if (!article) {

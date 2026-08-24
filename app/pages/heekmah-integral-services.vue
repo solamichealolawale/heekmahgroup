@@ -4,12 +4,12 @@ import type { InteriorPageContent } from '~/types/content'
 
 const content = await useCmsContent<InteriorPageContent>('services', servicesPageContent)
 
-usePageSeo({
+usePageSeo(() => ({
   ...content.value.seo,
   path: '/heekmah-integral-services/',
   image: content.value.hero.image,
   schemaName: content.value.hero.title,
-})
+}))
 </script>
 
 <template>

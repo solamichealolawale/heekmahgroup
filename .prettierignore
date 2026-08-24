@@ -1,0 +1,6 @@
+.nuxt/
+.output/
+artifacts/
+node_modules/
+pnpm-lock.yaml
+wordpress/heekmah-content/content/seed.json
